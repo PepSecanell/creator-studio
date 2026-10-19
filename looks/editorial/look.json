@@ -1,0 +1,51 @@
+{
+  "schema": "creator-look/v1",
+  "id": "editorial",
+  "label": "Editorial",
+  "fonts": {
+    "title": "fonts/InstrumentSerif-Regular.ttf",
+    "caption": "fonts/InstrumentSans-SemiBold.ttf",
+    "body": "fonts/InstrumentSans-Regular.ttf",
+    "hand": "fonts/InstrumentSerif-Italic.ttf"
+  },
+  "palette_defaults": {
+    "ground": "#F3EEE4",
+    "ink": "#1C1B19",
+    "accent": "#A4473A",
+    "accent_2": "#3E5A4D",
+    "muted": "#8E877C",
+    "on_accent": "#FBF7F0"
+  },
+  "captions": {
+    "shape": "underline",
+    "fill": "ground",
+    "text": "ink",
+    "emphasis": "accent",
+    "emphasis_mode": "colour",
+    "size": 64,
+    "y": 0.7,
+    "max_words": 5
+  },
+  "hook_card": {
+    "shape": "none",
+    "fill": "ground",
+    "text": "ink"
+  },
+  "end_card": {
+    "fill": "ground",
+    "text": "ink",
+    "show_logo": true,
+    "show_cta": true
+  },
+  "layouts": [
+    "face",
+    "split",
+    "graphic",
+    "title"
+  ],
+  "cover": {
+    "layout": "face_words",
+    "max_words": 5
+  },
+  "motion": "tokens.css"
+}

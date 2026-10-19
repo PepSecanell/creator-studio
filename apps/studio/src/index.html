@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Studio</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="setup" class="setup" hidden>
+    <h1 id="setup-title">Run ./studio setup first</h1>
+    <p id="setup-text" class="muted"></p>
+    <button class="btn" data-act="reload">Try again</button>
+  </div>
+
+  <div id="app" class="app" hidden>
+    <nav class="side">
+      <div class="brandmark">
+        <img id="logo" alt="" hidden>
+        <div>
+          <div id="brand-name" class="brand-name"></div>
+          <div class="brand-sub">Studio</div>
+        </div>
+      </div>
+      <button class="nav" data-act="go" data-screen="shorts">Shorts</button>
+      <button class="nav" data-act="go" data-screen="long">Long videos</button>
+      <button class="nav" data-act="go" data-screen="film">Film day</button>
+      <button class="nav" data-act="go" data-screen="edits">Edits</button>
+      <button class="nav" data-act="go" data-screen="kit">Kit</button>
+      <button class="nav" data-act="go" data-screen="brand">Brand</button>
+    </nav>
+    <main id="main" class="main"></main>
+  </div>
+
+  <div id="status" class="status"></div>
+  <div id="logdrawer" class="logdrawer" hidden></div>
+  <div id="cardpage" class="cardpage" hidden></div>
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="main.js"></script>
+</body>
+</html>

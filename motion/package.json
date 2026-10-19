@@ -1,0 +1,21 @@
+{
+  "name": "creator-studio-motion",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Brand tokened motion graphics for Shorts and long videos, rendered with HyperFrames.",
+  "type": "module",
+  "license": "MIT",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "test": "node lint.mjs",
+    "list": "node render.mjs --list",
+    "lint": "node lint.mjs",
+    "preview": "node preview.mjs",
+    "zone-check": "node zone-check.mjs"
+  },
+  "dependencies": {
+    "gsap": "3.14.2",
+    "hyperframes": "0.8.169",
+    "sharp": "^0.35.0"
+  }
+}

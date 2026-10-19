@@ -1,0 +1,19 @@
+{
+  "name": "chat",
+  "label": "A short exchange with an assistant: 2 to 4 messages, one per word cue",
+  "kind": "both",
+  "zones": ["split", "full"],
+  "duration": 5,
+  "vars": {
+    "variant": { "type": "enum", "values": ["bubbles", "app", "prompt"], "default": "bubbles", "label": "bubbles = on the ground, app = inside a chat window, prompt = one prompt box that types, then the answer card" },
+    "msgs": { "type": "string", "default": "me: Make me a habit tracker|ai: Done. It runs on your phone tonight.", "label": "me: text|ai: text|... (2 to 4, about 10 words each)" },
+    "at": { "type": "time", "default": "0.3|2.0", "label": "When each message lands, | separated" },
+    "image": { "type": "image", "default": "", "label": "The assistant's avatar (blank = its initial)" },
+    "name": { "type": "string", "default": "Assistant", "label": "The assistant's name (app header, prompt label)" },
+    "typing": { "type": "enum", "values": ["yes", "no"], "default": "yes", "label": "Typing dots before each reply" },
+    "hot": { "type": "string", "default": "on your phone", "label": "Words in the reply to mark" },
+    "hot_at": { "type": "time", "default": 2.8, "label": "When the mark swipes (never before the reply + 0.6 s)" },
+    "out": { "type": "enum", "values": ["cut", "edge"], "default": "cut", "label": "cut = hold to the end, edge = leave" },
+    "out_at": { "type": "time", "default": "", "label": "edge: when it leaves (blank = end)" }
+  }
+}

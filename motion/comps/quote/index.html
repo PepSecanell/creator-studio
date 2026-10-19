@@ -1,0 +1,75 @@
+<!doctype html>
+<!-- quote: a pull quote for a long video. One sentence, big, its key words marked on the words the speaker
+     stresses, then who said it under a short rule.
+     center = big and centred, a large opening mark above
+     side = left aligned in the split zone, a tall accent rule at its left edge
+     card = on a paper card with the attribution in a footer -->
+<html>
+<head><meta charset="UTF-8"/>
+<link rel="stylesheet" href="tokens.css"/><link rel="stylesheet" href="core/cs.css"/></head>
+<body style="margin:0;padding:0;background:transparent;">
+<div id="stage" data-composition-id="cs-quote" data-width="1920" data-height="1080" data-start="0" data-duration="6" data-track-index="0">
+<style>
+#wrap { position: relative; width: 1460px; }
+#stage.side #wrap { width: 860px; }
+#stage.card #wrap { width: 1300px; }
+#box { position: relative; }
+#stage.card #box { padding: 64px 80px 56px; }
+#stage.side #box { padding-left: 56px; }
+#qm { font-family: var(--cs-font-title); font-weight: var(--x-title-weight); font-size: calc(300px * var(--x-title-scale)); line-height: .7; height: 150px; color: var(--cs-accent-2); will-change: transform, opacity; }
+#stage.center #qm { text-align: center; }
+#stage.side #qm, #stage.card #qm { display: none; }
+#line { font-family: var(--cs-font-title); font-weight: var(--x-title-weight); letter-spacing: var(--x-title-track); line-height: 1.08; font-style: var(--cs-quote-style, normal); }
+#stage.center #line { text-align: center; }
+#bar { display: none; position: absolute; left: 0; top: 6px; bottom: 6px; width: calc(var(--cs-stroke) * 2); border-radius: 999px; background: var(--cs-accent); transform-origin: 50% 0; will-change: transform; }
+#stage.side #bar { display: block; }
+#who { display: flex; flex-direction: column; gap: 6px; margin-top: 40px; }
+#stage.center #who { align-items: center; }
+#stage.card #who { margin-top: 44px; padding-top: 28px; border-top: 2px solid var(--x-line); }
+#rule { width: 110px; height: var(--cs-stroke); background: var(--cs-ink); margin-bottom: 18px; transform-origin: 0 50%; will-change: transform; }
+#stage.center #rule { transform-origin: 50% 50%; }
+#stage.card #rule { display: none; }
+#au { font-size: 44px; font-weight: var(--x-strong); }
+#ro { font-size: 36px; color: var(--x-ink2); }
+</style>
+<div id="zone"><div id="cam"><div id="wrap">
+  <div class="cs-sh" id="bsh"><div id="box">
+    <i id="bar"></i>
+    <div id="qm">&ldquo;</div>
+    <div id="line"></div>
+    <div id="who"><i id="rule"></i><div class="ml"><span class="mi" id="au"></span></div><div class="ml"><span class="mi" id="ro"></span></div></div>
+  </div></div>
+</div></div></div>
+<script src="core/gsap.min.js"></script>
+<script src="core/cs.js"></script>
+<script>
+CS.comp('quote', function (v, c, tl) {
+  var variant = CS.pick(v.variant, ['center', 'side', 'card']);
+  c.stage.classList.add(variant);
+  if (variant === 'card') document.getElementById('box').className = 'cs-card';
+  else document.getElementById('bsh').classList.remove('cs-sh');
+  var hots = CS.list(v.hot).slice(0, 2);
+  document.getElementById('au').textContent = v.author || '';
+  document.getElementById('ro').textContent = v.role || '';
+  document.getElementById('ro').parentNode.style.display = v.role ? '' : 'none';
+  var sizes = variant === 'side' ? [92, 84, 76, 68, 62] : [112, 100, 90, 80, 72];
+  var r = CS.fitText(document.getElementById('line'), v.text, hots, CS.titleSizes(sizes), variant === 'side' ? 6 : 4);
+  CS.place(document.getElementById('wrap'), { max: 1 });
+  var at = CS.t('at', 0.2), l0 = at + (variant === 'center' ? 0.25 : 0.15);
+  var hotAt = CS.times('hot_at', hots.length, l0 + 1.2, 0.8);
+  if (variant === 'center') CS.settle(tl, '#qm', at, { scale: true });
+  if (variant === 'side') CS.reveal(tl, '#bar', at, { axis: 'y' });
+  if (variant === 'card') CS.surfaceIn(tl, '#box', at, { dir: 'down' });
+  CS.linesIn(tl, r.inner, l0, { stagger: 0.09 });
+  var settled = l0 + CS.MASK.line + r.inner.length * 0.09;
+  CS.reveal(tl, '#rule', settled);
+  CS.linesIn(tl, ['#au', '#ro'], settled + 0.1);
+  r.marks.forEach(function (mk, i) { CS.swipeAll(tl, mk, Math.max(settled, hotAt[i]), CS.S.short * Math.max(1, mk.length)); });
+  CS.breath(tl, '#cam', settled, c.dur, 0.015);
+  if (CS.lower(v.out) !== 'cut') CS.surfaceOut(tl, '#box', Math.min(c.dur - CS.MASK.out, parseFloat(v.out_at) || c.dur - 0.4), { dir: 'up' });
+  tl.set({}, {}, c.dur);
+});
+</script>
+</div>
+</body>
+</html>

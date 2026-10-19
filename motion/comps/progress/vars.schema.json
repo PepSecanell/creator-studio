@@ -1,0 +1,16 @@
+{
+  "name": "progress",
+  "label": "Where we are: the video's steps with the current one lit, so a viewer always knows the way",
+  "kind": "long",
+  "zones": ["full", "split"],
+  "duration": 4,
+  "vars": {
+    "variant": { "type": "enum", "values": ["rail", "corner", "list"], "default": "rail", "label": "rail = a line of steps across the top, corner = a small counter and the step name, list = a stacked list at the side" },
+    "steps": { "type": "string", "default": "Idea|Build|Test|Ship", "label": "The steps, | separated (2 to 6, 1 or 2 words each)" },
+    "current": { "type": "number", "default": 2, "label": "The step we are on now (1 = first)" },
+    "at": { "type": "time", "default": 0.2, "label": "When it arrives" },
+    "move_at": { "type": "time", "default": 0.9, "label": "When it moves from the step before to the current one" },
+    "out": { "type": "enum", "values": ["edge", "cut"], "default": "edge", "label": "edge = leave by its edge at out_at, cut = hold to the end" },
+    "out_at": { "type": "time", "default": "", "label": "edge: when it leaves (blank = 0.4 s before the end)" }
+  }
+}

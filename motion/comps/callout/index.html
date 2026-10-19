@@ -1,0 +1,101 @@
+<!doctype html>
+<!-- callout: point at one region of a screen recording. Coordinates are frame pixels of the footage under it.
+     Every stroke has a ground coloured halo under it, so it reads over a white page and a dark one alike.
+     box = an outline draws round the region, a label tab settles on its corner
+     spotlight = the rest of the frame dims (a soft scrim, never black), the region keeps a thin outline
+     arrow = a label chip where there is room, an arrow draws from it to the region
+     `zoom` is only a hint for the video builder, which pushes into the footage itself. -->
+<html>
+<head><meta charset="UTF-8"/>
+<link rel="stylesheet" href="tokens.css"/><link rel="stylesheet" href="core/cs.css"/></head>
+<body style="margin:0;padding:0;background:transparent;">
+<div id="stage" data-composition-id="cs-callout" data-width="1920" data-height="1080" data-start="0" data-duration="4" data-track-index="0">
+<style>
+#svg { position: absolute; left: 0; top: 0; overflow: visible; }
+#svg .halo { fill: none; stroke: var(--cs-ground); stroke-linecap: round; stroke-linejoin: round; opacity: .9; }
+#svg .ink { fill: none; stroke: var(--cs-ink); stroke-linecap: round; stroke-linejoin: round; }
+#svg .acc { fill: none; stroke: var(--cs-accent-2); stroke-linecap: round; stroke-linejoin: round; }
+#svg .head { fill: var(--cs-accent-2); stroke: var(--cs-ground); stroke-width: 4; stroke-linejoin: round; }
+#scrim { fill: var(--cs-ink); fill-rule: evenodd; opacity: 0; will-change: opacity; }
+#lab { position: absolute; left: 0; top: 0; font-size: 44px; will-change: transform, opacity; filter: drop-shadow(var(--x-shadow)); }
+</style>
+<svg id="svg"></svg>
+<span class="cs-chip dark" id="lab"></span>
+<script src="core/gsap.min.js"></script>
+<script src="core/cs.js"></script>
+<script>
+CS.comp('callout', function (v, c, tl) {
+  var variant = CS.pick(v.variant, ['box', 'spotlight', 'arrow']), NS = 'http://www.w3.org/2000/svg';
+  var Z = CS.ZONES[c.shape][c.zone].rects[0];
+  var n = CS.nums(String(v.region || '').replace(/,/g, '|'));
+  var R = n.length === 4 ? { x: n[0], y: n[1], w: n[2], h: n[3] } : { x: c.W * 0.4, y: c.H * 0.3, w: c.W * 0.25, h: c.H * 0.2 };
+  // keep the box (plus its stroke) inside the zone
+  var pad = 14;
+  R.x = Math.max(Z[0] + pad, Math.min(R.x, Z[2] - pad - 40)); R.y = Math.max(Z[1] + pad, Math.min(R.y, Z[3] - pad - 40));
+  R.w = Math.min(R.w, Z[2] - pad - R.x); R.h = Math.min(R.h, Z[3] - pad - R.y);
+  var svg = document.getElementById('svg'), lab = document.getElementById('lab');
+  svg.setAttribute('width', c.W); svg.setAttribute('height', c.H); svg.setAttribute('viewBox', '0 0 ' + c.W + ' ' + c.H); svg.innerHTML = '';
+  lab.textContent = v.label || ''; lab.style.display = v.label ? '' : 'none';
+  var at = CS.t('at', 0.3), mode = CS.lower(v.out), oa = Math.min(c.dur - CS.MASK.out, parseFloat(v.out_at) || c.dur - 0.4);
+  var rad = Math.min(24, CS.token('--cs-radius', 12) * 1.2), sw = Math.max(5, CS.token('--cs-stroke', 4) * 1.4);
+  function path(d, cls, w) { var p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); p.setAttribute('class', cls); if (w) p.setAttribute('stroke-width', w); svg.appendChild(p); return p; }
+  function rr(x, y, w, h, r) { return 'M' + (x + r) + ' ' + y + ' H' + (x + w - r) + ' A' + r + ' ' + r + ' 0 0 1 ' + (x + w) + ' ' + (y + r) + ' V' + (y + h - r) + ' A' + r + ' ' + r + ' 0 0 1 ' + (x + w - r) + ' ' + (y + h) + ' H' + (x + r) + ' A' + r + ' ' + r + ' 0 0 1 ' + x + ' ' + (y + h - r) + ' V' + (y + r) + ' A' + r + ' ' + r + ' 0 0 1 ' + (x + r) + ' ' + y + ' Z'; }
+  function draw(p, when, dur) { var L = p.getTotalLength(); gsap.set(p, { strokeDasharray: L + 2, strokeDashoffset: L + 2 }); tl.to(p, { strokeDashoffset: 0, duration: dur || CS.S.long, ease: CS.EASE.enter }, when); }
+  var outline = rr(R.x - 8, R.y - 8, R.w + 16, R.h + 16, rad), drawn = [];
+  // where the label goes: the side of the region with the most room inside the zone
+  var room = { above: R.y - Z[1], below: Z[3] - (R.y + R.h), left: R.x - Z[0], right: Z[2] - (R.x + R.w) };
+  var side = CS.lower(v.label_side);
+  if (!room[side]) side = Object.keys(room).sort(function (a, b) { return room[b] - room[a]; })[0];
+  var lw = lab.offsetWidth, lh = lab.offsetHeight, lx, ly;
+  if (variant === 'spotlight') {
+    var scrim = path('M0 0 H' + c.W + ' V' + c.H + ' H0 Z ' + outline, '');
+    scrim.setAttribute('id', 'scrim');
+    tl.to(scrim, { opacity: 0.38, duration: CS.S.long, ease: CS.EASE.settle }, at);
+  }
+  if (variant !== 'arrow') {
+    drawn.push(path(outline, 'halo', sw + 8), path(outline, variant === 'box' ? 'acc' : 'ink', variant === 'box' ? sw : sw * 0.6));
+    drawn.forEach(function (p) { draw(p, at + (variant === 'spotlight' ? 0.2 : 0)); });
+    // the tab sits on the outline's top left corner (or under it when there is no room above)
+    lx = R.x - 8; ly = room.above > lh + 24 ? R.y - 8 - lh - 12 : R.y + R.h + 20;
+    lx = Math.max(Z[0], Math.min(lx, Z[2] - lw)); ly = Math.max(Z[1], Math.min(ly, Z[3] - lh));
+    gsap.set(lab, { x: lx, y: ly });
+    CS.settle(tl, lab, at + 0.45, { scale: true });
+  } else {
+    // a quiet outline marks the region, the arrow does the pointing
+    var ring = [path(outline, 'halo', sw + 4), path(outline, 'ink', Math.max(3, sw * 0.5))];
+    ring.forEach(function (p) { draw(p, at + 0.6); });
+    var gap = 200;
+    if (side === 'above') { lx = R.x + R.w / 2 - lw / 2 - 160; ly = R.y - gap - lh - 60; }
+    else if (side === 'below') { lx = R.x + R.w / 2 - lw / 2 - 160; ly = R.y + R.h + gap + 60; }
+    else if (side === 'left') { lx = R.x - gap - lw - 60; ly = R.y + R.h / 2 - lh / 2 - 90; }
+    else { lx = R.x + R.w + gap + 60; ly = R.y + R.h / 2 - lh / 2 - 90; }
+    lx = Math.max(Z[0], Math.min(lx, Z[2] - lw)); ly = Math.max(Z[1], Math.min(ly, Z[3] - lh));
+    gsap.set(lab, { x: lx, y: ly });
+    // from the chip's nearest edge to just outside the region, a gentle curve
+    var sx = lx + lw / 2, sy = ly + lh / 2, tx = R.x + R.w / 2, ty = R.y + R.h / 2;
+    var dx = tx - sx, dy = ty - sy, d = Math.sqrt(dx * dx + dy * dy), ux = dx / d, uy = dy / d;
+    var s0 = Math.min(Math.abs(ux) > 1e-3 ? (lw / 2 + 16) / Math.abs(ux) : 1e9, Math.abs(uy) > 1e-3 ? (lh / 2 + 16) / Math.abs(uy) : 1e9);
+    var e0 = Math.min(Math.abs(ux) > 1e-3 ? (R.w / 2 + 22) / Math.abs(ux) : 1e9, Math.abs(uy) > 1e-3 ? (R.h / 2 + 22) / Math.abs(uy) : 1e9);
+    var ax = sx + ux * s0, ay = sy + uy * s0, bx = tx - ux * e0, by = ty - uy * e0, mx = (ax + bx) / 2 - uy * d * 0.12, my = (ay + by) / 2 + ux * d * 0.12;
+    var dd = 'M' + ax + ' ' + ay + ' Q' + mx + ' ' + my + ' ' + bx + ' ' + by;
+    var halo = path(dd, 'halo', sw + 8), line = path(dd, 'acc', sw);
+    CS.settle(tl, lab, at, { scale: true });
+    draw(halo, at + 0.25); draw(line, at + 0.25);
+    // the arrowhead points along the curve's last tangent
+    var hx = bx - mx, hy = by - my, hl = Math.sqrt(hx * hx + hy * hy) || 1; hx /= hl; hy /= hl;
+    var S = 26, head = document.createElementNS(NS, 'path');
+    head.setAttribute('class', 'head');
+    head.setAttribute('d', 'M' + (bx + hx * 6) + ' ' + (by + hy * 6) + ' L' + (bx - hx * S - hy * S * 0.6) + ' ' + (by - hy * S + hx * S * 0.6) + ' L' + (bx - hx * S + hy * S * 0.6) + ' ' + (by - hy * S - hx * S * 0.6) + ' Z');
+    svg.appendChild(head); gsap.set(head, { opacity: 0 }); tl.to(head, { opacity: 1, duration: CS.S.micro, ease: CS.EASE.settle }, at + 0.25 + CS.S.long * 0.85);
+
+  }
+  if (mode !== 'cut') {
+    tl.to(lab, { opacity: 0, y: '-=10', duration: 0.3, ease: CS.EASE.exit }, oa);
+    tl.to(svg, { opacity: 0, duration: 0.3, ease: CS.EASE.exit }, oa);
+  }
+  tl.set({}, {}, c.dur);
+});
+</script>
+</div>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "terminal",
+  "label": "A command that types on the word, then 2 to 4 short output lines",
+  "kind": "both",
+  "zones": ["split", "full"],
+  "duration": 5,
+  "vars": {
+    "variant": { "type": "enum", "values": ["window", "light", "bare"], "default": "window", "label": "window = dark terminal, light = paper terminal, bare = no window, the command set big" },
+    "title": { "type": "string", "default": "build.sh", "label": "Window title" },
+    "prompt": { "type": "string", "default": "$", "label": "Prompt symbol" },
+    "cmd": { "type": "string", "default": "npm run deploy", "label": "The command (typed on)" },
+    "lines": { "type": "string", "default": "# building 14 pages|+ tests passed|+ uploaded in 9s|! live at example.com", "label": "Output lines, | separated (2 to 4). Start with '! ' = alert, '+ ' = done, '# ' = dim comment" },
+    "hot": { "type": "string", "default": "live", "label": "Words in the output to mark" },
+    "hot_at": { "type": "time", "default": 3.6, "label": "When the mark swipes" },
+    "screen_at": { "type": "time", "default": 0.1, "label": "When the window arrives" },
+    "type_at": { "type": "time", "default": 0.5, "label": "When typing starts" },
+    "type_dur": { "type": "string", "default": "", "label": "Typing length in seconds (blank = 0.05 s per character, at most 1.6)" },
+    "lines_at": { "type": "time", "default": "1.8|2.3|2.7|3.2", "label": "When each output line rises, | separated" },
+    "out": { "type": "enum", "values": ["cut", "edge"], "default": "cut", "label": "cut = hold to the end, edge = leave" },
+    "out_at": { "type": "time", "default": "", "label": "edge: when it leaves (blank = end)" }
+  }
+}

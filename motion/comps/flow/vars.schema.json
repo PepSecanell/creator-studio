@@ -1,0 +1,22 @@
+{
+  "name": "flow",
+  "label": "Steps that pass something along: a line, a checklist column, or a loop that never stops",
+  "kind": "both",
+  "zones": ["split", "full"],
+  "duration": 5,
+  "vars": {
+    "variant": { "type": "enum", "values": ["line", "column", "loop"], "default": "line", "label": "line = 2 or 3 nodes across, column = rows that tick, loop = laps that speed up while a counter climbs" },
+    "nodes": { "type": "string", "default": "Idea|Draft|Ship", "label": "Node labels, | separated (2 to 4, line at most 3)" },
+    "images": { "type": "images", "default": "", "label": "Optional node images, | separated, same order (blank = the step number)" },
+    "at": { "type": "time", "default": "0.2|0.6|1.0", "label": "When each node arrives, | separated" },
+    "carrier": { "type": "string", "default": "v1", "label": "The thing that travels: a short text" },
+    "go_at": { "type": "time", "default": "1.6|2.6", "label": "line and column: when the carrier leaves each node, | separated" },
+    "run_at": { "type": "time", "default": 1.6, "label": "loop: when the laps start" },
+    "laps": { "type": "number", "default": 6, "label": "loop: how many laps" },
+    "count_to": { "type": "number", "default": 2418, "label": "loop: where the counter lands" },
+    "count_label": { "type": "string", "default": "runs", "label": "loop: what it counts, 1 or 2 words" },
+    "stop_at": { "type": "time", "default": "", "label": "loop: when it stops dead (blank = end)" },
+    "out": { "type": "enum", "values": ["cut", "edge"], "default": "cut", "label": "cut = hold to the end, edge = leave" },
+    "out_at": { "type": "time", "default": "", "label": "edge: when it leaves (blank = end)" }
+  }
+}

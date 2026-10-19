@@ -1,0 +1,37 @@
+{
+  "about": "Approximate app interface zones for vertical video, in pixels on a 1080x1920 frame. Boxes are [x0, y0, x1, y1]. These are estimates from public creator guides. Check them against screenshots of your own account and edit the numbers here.",
+  "platforms": {
+    "tiktok": {
+      "name": "TikTok",
+      "ui": [
+        {"name": "top bar", "box": [0, 0, 1080, 150]},
+        {"name": "caption and sound", "box": [0, 1440, 1080, 1920]},
+        {"name": "left edge", "box": [0, 0, 60, 1920]},
+        {"name": "action column", "box": [920, 860, 1080, 1440]}
+      ],
+      "length_s": {"min": 3, "max": 600}
+    },
+    "youtube_shorts": {
+      "name": "YouTube Shorts",
+      "ui": [
+        {"name": "top bar", "box": [0, 0, 1080, 288]},
+        {"name": "title and channel", "box": [0, 1248, 1080, 1920]},
+        {"name": "left edge", "box": [0, 0, 48, 1920]},
+        {"name": "action column", "box": [888, 860, 1080, 1248]}
+      ],
+      "length_s": {"min": 3, "max": 180}
+    },
+    "reels": {
+      "name": "Instagram and Facebook Reels",
+      "ui": [
+        {"name": "top bar", "box": [0, 0, 1080, 269]},
+        {"name": "caption and audio", "box": [0, 1248, 1080, 1920]},
+        {"name": "left edge", "box": [0, 0, 65, 1920]},
+        {"name": "right edge", "box": [1015, 0, 1080, 1920]}
+      ],
+      "length_s": {"min": 3, "max": 90}
+    }
+  },
+  "default_set": ["tiktok", "youtube_shorts", "reels"],
+  "margin_px": 16
+}

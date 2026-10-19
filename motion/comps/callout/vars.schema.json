@@ -1,0 +1,17 @@
+{
+  "name": "callout",
+  "label": "Point at one region of a screen recording: a box draws around it, a spotlight dims the rest, or an arrow points from a label",
+  "kind": "long",
+  "zones": ["full"],
+  "duration": 4,
+  "vars": {
+    "variant": { "type": "enum", "values": ["box", "spotlight", "arrow"], "default": "box", "label": "box = an outline draws round the region with a label tab, spotlight = the rest of the frame dims, arrow = a label with an arrow that draws to the region" },
+    "region": { "type": "string", "default": "1040,300,560,220", "label": "The region in frame pixels: x,y,w,h" },
+    "label": { "type": "string", "default": "This button", "label": "The label, at most 4 words" },
+    "label_side": { "type": "enum", "values": ["auto", "above", "below", "left", "right"], "default": "auto", "label": "Where the label sits (auto = where there is room)" },
+    "at": { "type": "time", "default": 0.3, "label": "When it draws" },
+    "zoom": { "type": "number", "default": 1.0, "label": "A hint for the video builder: how much to push into the region (1 = none). The comp itself never scales the footage" },
+    "out": { "type": "enum", "values": ["edge", "cut"], "default": "edge", "label": "edge = leave at out_at, cut = hold to the end" },
+    "out_at": { "type": "time", "default": "", "label": "edge: when it leaves (blank = 0.4 s before the end)" }
+  }
+}

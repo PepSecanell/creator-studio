@@ -1,0 +1,111 @@
+<!doctype html>
+<!-- terminal: one command types on the word, then 2 to 4 short output lines rise one by one.
+     Line prefixes: "! " = an alert, "+ " = done (a tick), "# " = a dim comment. About 24 characters fit a line.
+     window = a dark terminal window (three dots, the title in the bar)
+     light = a paper terminal, ink type
+     bare = no window: the prompt and command set big, the output under a rule -->
+<html>
+<head><meta charset="UTF-8"/>
+<link rel="stylesheet" href="tokens.css"/><link rel="stylesheet" href="core/cs.css"/></head>
+<body style="margin:0;padding:0;background:transparent;">
+<div id="stage" data-composition-id="cs-terminal" data-width="1080" data-height="1920" data-start="0" data-duration="5" data-track-index="0">
+<style>
+#wrap { position: relative; width: 820px; }
+#stage.zone-split #wrap { width: 920px; }
+#stage.shape-landscape #wrap { width: 1100px; }
+#term { overflow: hidden; will-change: clip-path; }
+#tbar { position: relative; display: flex; align-items: center; gap: 16px; height: 84px; padding: 0 32px; }
+#tbar .dot { width: 24px; height: 24px; border-radius: 50%; }
+#d1 { background: var(--cs-accent-2); } #d2 { background: var(--cs-accent); } #d3 { background: var(--cs-muted); }
+#ttl { position: absolute; left: 0; right: 0; text-align: center; font-size: 36px; }
+#tbody { padding: 26px 48px 48px; font-family: var(--x-font-mono); font-weight: 500; line-height: 1.36; }
+.ln { white-space: pre-wrap; overflow-wrap: break-word; }
+#pr { margin-right: 0.6em; font-weight: 700; }
+#caret { display: inline-block; width: 0.56em; height: 1.05em; vertical-align: -0.16em; margin-left: 0.06em; will-change: opacity; }
+.o { display: block; }
+.o.alert { font-weight: 700; }
+.o.dim { opacity: .6; }
+#cmdl { margin-bottom: 12px; }
+/* window: dark */
+#stage.window #tbar { border-bottom: 2px solid color-mix(in srgb, var(--cs-ground) 14%, transparent); }
+#stage.window #ttl { color: var(--x-on-dark2); }
+#stage.window #pr, #stage.window .tick, #stage.window .o.alert { color: color-mix(in srgb, var(--cs-accent) 78%, var(--cs-ground)); }
+#stage.window #caret { background: var(--cs-accent); }
+/* light: paper */
+#stage.light #tbar { border-bottom: 2px solid var(--x-line); }
+#stage.light #ttl { color: var(--x-ink2); }
+#stage.light #pr, #stage.light .tick { color: var(--cs-accent-2); }
+#stage.light #caret, #stage.bare #caret { background: var(--cs-ink); }
+/* bare: no window */
+#stage.bare #tbar { display: none; }
+#stage.bare #tsh { filter: none; }
+#stage.bare #term { background: none; border: none; color: var(--cs-ink); }
+#stage.bare #tbody { padding: 0; }
+#stage.bare #pl { line-height: 1.18; font-weight: 700; }
+#stage.bare #pr, #stage.bare .tick { color: var(--cs-accent-2); }
+#rule2 { display: none; height: var(--cs-stroke); background: var(--cs-ink); margin: 32px 0 24px; transform-origin: 0 50%; will-change: transform; }
+#stage.bare #rule2 { display: block; }
+</style>
+<div id="zone"><div id="cam"><div id="wrap">
+  <div class="cs-sh" id="tsh"><div id="term">
+    <div id="tbar"><i class="dot" id="d1"></i><i class="dot" id="d2"></i><i class="dot" id="d3"></i><span id="ttl" class="cs-meta"></span></div>
+    <div id="tbody">
+      <div class="ln" id="pl"><span id="pr"></span><span id="cmd"></span><span id="caret"></span></div>
+      <div id="rule2"></div>
+      <div id="outs"></div>
+    </div>
+  </div></div>
+</div></div></div>
+<script src="core/gsap.min.js"></script>
+<script src="core/cs.js"></script>
+<script>
+CS.comp('terminal', function (v, c, tl) {
+  var variant = CS.pick(v.variant, ['window', 'light', 'bare']);
+  c.stage.classList.add(variant);
+  document.getElementById('term').className = variant === 'window' ? 'cs-dark' : (variant === 'light' ? 'cs-card' : '');
+  var outs = CS.list(v.lines).slice(0, 4);
+  function lineHTML(s) {
+    var cls = 'o', body = s, pre = '';
+    if (/^!\s/.test(s)) { cls += ' alert'; body = s.slice(2); }
+    else if (/^#\s/.test(s)) cls += ' dim';
+    else if (/^\+\s/.test(s)) { body = s.slice(2); pre = '<span class="tick">&#10003;</span> '; }
+    return '<span class="ml ln"><span class="mi ' + cls + '">' + pre + CS.marked(body, v.hot) + '</span></span>';
+  }
+  document.getElementById('ttl').textContent = v.title || '';
+  document.getElementById('pr').textContent = v.prompt || '$';
+  document.getElementById('outs').innerHTML = outs.map(lineHTML).join('');
+  var s0 = CS.t('screen_at', 0.1), t0 = Math.max(s0 + 0.3, CS.t('type_at', 0.5));
+  var cmd = String(v.cmd || ''), td = parseFloat(v.type_dur);
+  if (isNaN(td)) td = Math.min(1.6, Math.max(0.4, cmd.length * 0.05));
+  var oa = CS.times('lines_at', outs.length, t0 + td + 0.3, 0.45);
+  // mono size: the largest step where the longest line fits on one line (mono advance is 0.6 em)
+  var WW = document.getElementById('wrap').offsetWidth, inner = variant === 'bare' ? WW : WW - 96;
+  var longest = Math.max.apply(null, outs.map(function (o) { return o.replace(/^[!+]\s/, '  ').length; }).concat([1]));
+  var ladder = variant === 'bare' ? [62, 58, 54, 50, 46] : [58, 54, 50, 46, 44], fs = ladder[ladder.length - 1];
+  for (var q = 0; q < ladder.length; q++) if (longest * 0.6 * ladder[q] <= inner) { fs = ladder[q]; break; }
+  document.getElementById('tbody').style.fontSize = fs + 'px';
+  if (variant === 'bare') {
+    var cl = Math.max(1, (v.prompt || '$').length + 1 + cmd.length);
+    document.getElementById('pl').style.fontSize = ([84, 76, 68, 60].filter(function (x) { return cl * 0.6 * x <= WW; })[0] || 60) + 'px';
+  } else document.getElementById('pl').style.fontSize = Math.round(fs * 1.08) + 'px';
+  // measure with the whole command in place, so typing never grows the window past the zone
+  document.getElementById('cmd').textContent = cmd;
+  CS.place(document.getElementById('wrap'), { max: c.zone === 'full' ? 1.12 : 1 });
+  if (variant === 'bare') CS.settle(tl, '#pl', s0);
+  else CS.surfaceIn(tl, '#term', s0, { dir: 'down' });
+  // the caret: two slow blinks while it waits, solid while typing, gone once the output starts
+  gsap.set('#caret', { opacity: 1 });
+  if (t0 - s0 > 0.7) tl.to('#caret', { opacity: 0, duration: CS.S.micro, ease: CS.EASE.linear, yoyo: true, repeat: 1 }, s0 + 0.3);
+  CS.typeOn(tl, document.getElementById('cmd'), cmd, t0, td);
+  tl.set('#caret', { opacity: 0 }, oa.length ? oa[0] : t0 + td + 0.3);
+  if (variant === 'bare') CS.reveal(tl, '#rule2', (oa.length ? oa[0] : t0 + td) - 0.15);
+  document.querySelectorAll('#outs .mi').forEach(function (el, i) { CS.linesIn(tl, el, oa[i]); });
+  var mk = [].slice.call(document.querySelectorAll('#outs .mk')), last = oa.length ? oa[oa.length - 1] : t0 + td;
+  if (mk.length) CS.swipeAll(tl, mk, Math.max(last + 0.3, CS.t('hot_at', 3.6)));
+  CS.breath(tl, '#cam', last + 0.5, c.dur, 0.015);
+  CS.ending(tl, '#term');
+});
+</script>
+</div>
+</body>
+</html>

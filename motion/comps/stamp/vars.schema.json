@@ -1,0 +1,18 @@
+{
+  "name": "stamp",
+  "label": "The verdict that slams: 1 to 3 words, alone or layered over another comp",
+  "kind": "both",
+  "zones": ["split", "full"],
+  "duration": 4,
+  "vars": {
+    "variant": { "type": "enum", "values": ["ink", "sticker", "tape"], "default": "ink", "label": "ink = rubber stamp, sticker = a label slapped on, tape = a band across the zone" },
+    "text": { "type": "string", "default": "SHIPPED", "label": "The stamp, 1 to 3 words" },
+    "sub": { "type": "string", "default": "", "label": "Optional second line, at most 4 words (ink and sticker)" },
+    "at": { "type": "time", "default": 0.4, "label": "When it slams" },
+    "angle": { "type": "number", "default": -8, "label": "Rotation in degrees" },
+    "x": { "type": "string", "default": "", "label": "Layered: centre x in frame px (blank = zone centre)" },
+    "y": { "type": "string", "default": "", "label": "Layered: centre y in frame px (blank = zone centre)" },
+    "out": { "type": "enum", "values": ["cut", "edge"], "default": "cut", "label": "cut = hold to the end, edge = leave" },
+    "out_at": { "type": "time", "default": "", "label": "edge: when it leaves (blank = end)" }
+  }
+}

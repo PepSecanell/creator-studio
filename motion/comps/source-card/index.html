@@ -1,0 +1,106 @@
+<!doctype html>
+<!-- source-card: a news source or a quote, rebuilt as one clean card. The source's mark, its name, the date
+     and ONE verbatim line, the key words marked on the words the speaker says. Never a pasted paragraph.
+     card = an article card (mark + name + date, a rule, the line in the title face)
+     push = a phone notification with a second banner peeking behind it
+     quote = no card: a big opening mark, the line, the attribution under a short rule -->
+<html>
+<head><meta charset="UTF-8"/>
+<link rel="stylesheet" href="tokens.css"/><link rel="stylesheet" href="core/cs.css"/></head>
+<body style="margin:0;padding:0;background:transparent;">
+<div id="stage" data-composition-id="cs-source-card" data-width="1080" data-height="1920" data-start="0" data-duration="5" data-track-index="0">
+<style>
+#wrap { width: 800px; position: relative; }
+#card { padding: 48px 56px 60px 72px; }
+.head { display: flex; align-items: center; gap: 24px; }
+#tile { width: 108px; height: 108px; }
+.who { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1; }
+#name { white-space: nowrap; font-size: var(--t-label); font-weight: var(--x-strong); }
+#rule { margin: 34px 0; }
+#line { font-family: var(--cs-font-title); font-weight: var(--x-title-weight); letter-spacing: var(--x-title-track); line-height: var(--x-title-lead); }
+/* push */
+#stage.push #card { border-radius: calc(var(--cs-radius) * 2.4); padding: 40px 44px 48px; }
+#stage.push #tile { width: 96px; height: 96px; }
+#stage.push #name { font-size: var(--t-meta); letter-spacing: 0.08em; text-transform: uppercase; color: var(--x-ink2); }
+#stage.push #date { position: absolute; right: 44px; top: 44px; }
+#stage.push #rule { display: none; }
+#stage.push #line { font-family: var(--cs-font-body); font-weight: var(--x-strong); letter-spacing: -0.01em; line-height: 1.16; margin-top: 24px; }
+#ghost { display: none; position: absolute; left: 40px; right: 40px; bottom: -36px; height: 120px; border-radius: calc(var(--cs-radius) * 2.4); opacity: .75; }
+#stage.push #ghost { display: block; }
+/* a filter makes its own containing block: the ghost's wrapper spans the card so the ghost peeks below it */
+#ghostsh { position: absolute; inset: 0; }
+#card { position: relative; }
+/* quote */
+#stage.quote #card { background: none; border: none; padding: 0; }
+#stage.quote .cs-sh { filter: none; }
+#qmark { display: none; font-family: var(--cs-font-title); font-weight: var(--x-title-weight); font-size: calc(var(--t-display) * 1.9); line-height: .72; height: 150px; padding-top: 34px; color: var(--cs-accent-2); will-change: transform, opacity; }
+#stage.quote #qmark { display: block; }
+#stage.quote #wrap { width: 900px; }
+#stage.quote #line { font-style: italic; }
+#stage.quote .head { margin-top: 44px; order: 3; }
+#stage.quote #tile { width: 88px; height: 88px; }
+#stage.quote #rule { display: none; }
+#qrule { display: none; width: 110px; height: var(--cs-stroke); background: var(--cs-ink); margin-top: 44px; transform-origin: 0 50%; will-change: transform; }
+#stage.quote #qrule { display: block; }
+#body { display: flex; flex-direction: column; }
+</style>
+<div id="zone"><div id="cam"><div id="wrap">
+  <div class="cs-sh" id="ghostsh"><div class="cs-card" id="ghost"></div></div>
+  <div class="cs-sh"><div class="cs-card" id="card"><div id="body">
+    <div id="qmark">&ldquo;</div>
+    <div class="head">
+      <div class="cs-tile" id="tile"></div>
+      <div class="who"><div class="ml"><span class="mi" id="name"></span></div><div class="ml"><span class="mi cs-meta" id="date"></span></div></div>
+    </div>
+    <div class="cs-rule" id="rule"></div>
+    <div id="line"></div>
+    <div id="qrule"></div>
+  </div></div></div>
+</div></div></div>
+<script src="core/gsap.min.js"></script>
+<script src="core/cs.js"></script>
+<script>
+CS.comp('source-card', function (v, c, tl) {
+  var variant = CS.pick(v.variant, ['card', 'push', 'quote']);
+  c.stage.classList.add(variant);
+  var hots = CS.list(v.hot).slice(0, 2);
+  document.getElementById('name').textContent = v.source || '';
+  document.getElementById('date').textContent = v.date || '';
+  CS.tile(document.getElementById('tile'), v.logo, v.source);
+  // the name: the largest size that fits its column, never cut off
+  var nm = document.getElementById('name'), col = nm.parentNode.parentNode.clientWidth;
+  if (variant !== 'push') CS.fitWidth(nm, col, [56, 50, 46, 42]);
+  var big = c.zone === 'full';
+  var sizes = variant === 'push' ? [74, 68, 62, 56] : (big ? [112, 102, 92, 84, 76] : [98, 90, 82, 74, 66]);
+  if (variant !== 'push') sizes = CS.titleSizes(sizes);
+  var r = CS.fitText(document.getElementById('line'), v.line, hots, sizes, variant === 'push' ? 3 : (variant === 'quote' && big ? 5 : 4));
+  CS.place(document.getElementById('wrap'), { max: variant === 'card' ? 1 : 1.2 });
+
+  var c0 = CS.t('card_at', 0.1), l0 = Math.max(c0 + 0.2, CS.t('line_at', 0.5));
+  var hotAt = CS.times('hot_at', hots.length, l0 + 1.0, 0.8);
+  if (variant === 'quote') {
+    CS.settle(tl, '#qmark', c0, { scale: true });
+    CS.linesIn(tl, r.inner, l0);
+    CS.reveal(tl, '#qrule', l0 + 0.3);
+    CS.settle(tl, '#tile', l0 + 0.4, { scale: true });
+    CS.linesIn(tl, ['#name', '#date'], l0 + 0.45);
+  } else {
+    if (variant === 'push') {
+      gsap.set('#card', { y: -12 });
+      tl.to('#card', { y: 0, duration: CS.S.long, ease: CS.EASE.enter }, c0);
+      CS.surfaceIn(tl, '#ghost', c0 + 0.25, { dir: 'down', plate: true });
+    }
+    CS.surfaceIn(tl, '#card', c0, { dir: 'down' });
+    CS.settle(tl, '#tile', c0 + 0.2, { scale: true });
+    CS.linesIn(tl, ['#name', '#date'], c0 + 0.25);
+    if (variant === 'card') CS.reveal(tl, '#rule', c0 + 0.35);
+    CS.linesIn(tl, r.inner, l0);
+  }
+  r.marks.forEach(function (mk, i) { CS.swipeAll(tl, mk, hotAt[i], CS.S.short * Math.max(1, mk.length)); });
+  CS.breath(tl, '#cam', l0 + CS.MASK.line + r.inner.length * CS.STEP, c.dur);
+  CS.ending(tl, variant === 'quote' ? '#body' : ['#card', '#ghost']);
+});
+</script>
+</div>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!doctype html>
+<!-- big-number: one number that lands, with ONE label. The count is timed to the words that produce it.
+     Tabular figures, so nothing jitters while it counts.
+     hero = the number set huge in the title face, a bar draws under it when it lands
+     odometer = tiles whose digit strips roll to the value (format=time rolls a clock past midnight)
+     bar = the number over a thick meter; cap = a line where the count and the fill STOP -->
+<html>
+<head><meta charset="UTF-8"/>
+<link rel="stylesheet" href="tokens.css"/><link rel="stylesheet" href="core/cs.css"/></head>
+<body style="margin:0;padding:0;background:transparent;">
+<div id="stage" data-composition-id="cs-big-number" data-width="1080" data-height="1920" data-start="0" data-duration="4" data-track-index="0">
+<style>
+#wrap { position: relative; display: flex; flex-direction: column; align-items: center; min-width: 600px; }
+#num { display: flex; justify-content: center; align-items: baseline; white-space: nowrap; line-height: 1; }
+#n { font-variant-numeric: tabular-nums lining-nums; }
+#pre { font-size: .56em; margin-right: .04em; }
+#unit { font-size: .42em; margin-left: .1em; }
+#under { width: 100%; height: calc(var(--cs-stroke) * 4); border-radius: calc(var(--cs-radius) * 0.5); background: var(--cs-accent);
+  margin-top: calc(var(--gap) * 0.5); transform-origin: 0 50%; transform: scaleX(0); will-change: transform; }
+#label { font-size: calc(var(--t-label) * var(--x-hand-scale)); margin-top: var(--gap); white-space: nowrap; color: var(--cs-ink); }
+/* odometer */
+#odo { display: none; align-items: center; gap: 14px; }
+#stage.odometer #odo { display: flex; }
+#stage.odometer #num, #stage.odometer #under { display: none; }
+.tile { position: relative; width: 150px; height: 208px; border-radius: var(--cs-radius); background: var(--x-dark); overflow: hidden; }
+.strip { position: absolute; left: 0; top: 0; width: 100%; will-change: transform; }
+.strip i { display: block; height: 208px; line-height: 208px; text-align: center; font-style: normal; font-family: var(--cs-font-body);
+  font-weight: var(--x-strong); font-size: 150px; color: var(--x-on-dark); font-variant-numeric: tabular-nums lining-nums; }
+.tile::after { content: ""; position: absolute; left: 0; right: 0; top: 103px; height: 3px; background: color-mix(in srgb, var(--cs-ground) 18%, transparent); }
+.sep { font-family: var(--cs-font-body); font-weight: var(--x-strong); font-size: 132px; color: var(--cs-ink); line-height: 1; }
+/* bar */
+#meter { display: none; position: relative; width: 760px; margin-top: var(--gap); }
+#stage.bar #meter { display: block; }
+#stage.bar #under { display: none; }
+#stage.bar #wrap { align-items: flex-start; }
+#mt { position: relative; height: 72px; border-radius: 999px; background: var(--x-soft); overflow: hidden; border: var(--x-border-w) solid var(--x-edge); }
+#mf { position: absolute; inset: 0; background: var(--cs-accent); transform-origin: 0 50%; transform: scaleX(0); will-change: transform; }
+#capl { position: absolute; top: -26px; height: 124px; width: calc(var(--cs-stroke) * 2); border-radius: 999px; background: var(--cs-ink); transform-origin: 50% 100%; will-change: transform; }
+#capt { position: absolute; top: 118px; }
+#stage.bar #label { margin-top: 150px; }
+</style>
+<div id="zone"><div id="cam"><div id="wrap">
+  <div id="num" class="cs-title"><span id="pre"></span><span id="n"></span><span id="unit"></span></div>
+  <div id="under"></div>
+  <div class="cs-sh"><div id="odo"></div></div>
+  <div id="meter"><div id="mt"><i id="mf"></i></div><i id="capl"></i><span class="cs-chip dark" id="capt"></span></div>
+  <div class="ml"><span class="mi cs-hand" id="label"></span></div>
+</div></div></div>
+<script src="core/gsap.min.js"></script>
+<script src="core/cs.js"></script>
+<script>
+CS.comp('big-number', function (v, c, tl) {
+  var variant = CS.pick(v.variant, ['hero', 'odometer', 'bar']);
+  c.stage.classList.add(variant);
+  var isTime = CS.lower(v.format) === 'time', from = parseFloat(v.from) || 0, val = parseFloat(v.value) || 0, dec = parseInt(v.decimals, 10) || 0;
+  if (isTime && val < from) val += 1440;
+  function str(x) { return isTime ? CS.clock(x) : CS.fmt(x, dec); }
+  var ca = CS.t('count_at', 0.5), cd = Math.max(0.3, Math.min(parseFloat(v.count_dur) || 1.8, c.dur - ca - 0.3)), landed = ca + cd;
+  var lab = document.getElementById('label');
+  lab.textContent = v.label || ''; lab.parentNode.style.display = v.label ? '' : 'none';
+
+  if (variant === 'odometer') {
+    var N = 22, samples = [];
+    for (var k = 0; k < N; k++) samples.push(str(from + (val - from) * k / (N - 1)));
+    var L = Math.max.apply(null, samples.map(function (s) { return s.length; }));
+    samples = samples.map(function (s) { while (s.length < L) s = ' ' + s; return s; });
+    var fin = samples[N - 1], html = v.prefix ? '<span class="sep">' + CS.esc(v.prefix) + '</span>' : '';
+    for (var ci = 0; ci < L; ci++) {
+      if (/[0-9 ]/.test(fin[ci]) && /[0-9]/.test(fin[ci] + samples[0][ci])) {
+        html += '<div class="tile"><div class="strip">' + samples.map(function (s) { return '<i>' + (s[ci] === ' ' ? '' : s[ci]) + '</i>'; }).join('') + '</div></div>';
+      } else html += '<span class="sep">' + CS.esc(fin[ci]) + '</span>';
+    }
+    if (v.unit) html += '<span class="sep" style="font-size:72px;margin-left:12px">' + CS.esc(v.unit) + '</span>';
+    document.getElementById('odo').innerHTML = html;
+    document.querySelectorAll('.tile').forEach(function (t, i) { CS.surfaceIn(tl, t, Math.max(0, ca - 0.45) + i * CS.STEP, { dir: 'up', plate: true }); });
+    document.querySelectorAll('.strip').forEach(function (sp) { tl.fromTo(sp, { y: 0 }, { y: -208 * (N - 1), duration: cd, ease: CS.EASE.travel, immediateRender: false }, ca); });
+    CS.settle(tl, '.sep', Math.max(0, ca - 0.3));
+  } else {
+    var n = document.getElementById('n'), num = document.getElementById('num');
+    document.getElementById('pre').textContent = v.prefix || '';
+    document.getElementById('unit').textContent = v.unit || '';
+    var cap = parseFloat(v.cap), hasCap = variant === 'bar' && !isNaN(cap), end = hasCap ? Math.min(val, cap) : val;
+    // size from the widest state, so nothing reflows while it counts
+    n.textContent = str(Math.max(Math.abs(end), Math.abs(from)));
+    var ladder = variant === 'bar' ? [180, 164, 146, 128] : [320, 280, 246, 214, 186, 160];
+    ladder.some(function (px) { num.style.fontSize = 'calc(' + px + 'px * var(--x-title-scale))'; return num.offsetWidth <= 800; });
+    num.style.minWidth = num.offsetWidth + 'px';   // hold the final width while it counts
+    n.textContent = str(from);
+    CS.settle(tl, num, Math.max(0, ca - 0.35));
+    if (hasCap) cd = cd * Math.max(0.15, (end - from) / Math.max(1e-6, val - from));
+    landed = ca + cd;
+    CS.count(tl, n, { from: from, to: end, at: ca, dur: cd, dec: dec, time: isTime, ease: hasCap ? CS.EASE.linear : CS.EASE.travel });
+    if (variant === 'hero') CS.reveal(tl, '#under', landed - 0.1);
+    else {
+      var mx = parseFloat(v.max) || Math.max(val, 1);
+      CS.surfaceIn(tl, '#mt', Math.max(0, ca - 0.3), { plate: true });
+      tl.to('#mf', { scaleX: Math.min(1, end / mx), duration: cd, ease: hasCap ? CS.EASE.linear : CS.EASE.travel }, ca);
+      var capl = document.getElementById('capl'), capt = document.getElementById('capt');
+      if (hasCap) {
+        var cx = 760 * Math.min(1, cap / mx);
+        capl.style.left = (cx - 6) + 'px';
+        capt.textContent = v.cap_label || 'cap';
+        capt.style.left = Math.max(0, Math.min(760 - capt.offsetWidth, cx - capt.offsetWidth / 2)) + 'px';
+        CS.reveal(tl, capl, Math.max(0, ca - 0.2), { axis: 'y' });
+        CS.settle(tl, capt, Math.max(0, ca - 0.1), { scale: true });
+        CS.emphasis(tl, capt, landed, { scale: 1.08 });
+      } else { capl.style.display = 'none'; capt.style.display = 'none'; }
+    }
+  }
+  if (v.label) CS.linesIn(tl, '#label', variant === 'hero' ? landed - 0.2 : Math.max(0, ca - 0.2));
+  CS.place(document.getElementById('wrap'), { max: variant === 'odometer' && c.zone === 'full' ? 1.45 : 1.1 });
+  CS.breath(tl, '#cam', landed + 0.3, c.dur, 0.015);
+  CS.ending(tl, '#wrap');
+});
+</script>
+</div>
+</body>
+</html>

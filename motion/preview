@@ -1,0 +1,3 @@
+#!/bin/sh
+# preview: see README.md
+exec node "$(dirname "$0")/preview.mjs" "$@"

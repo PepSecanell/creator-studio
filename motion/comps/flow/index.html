@@ -1,0 +1,174 @@
+<!doctype html>
+<!-- flow: A -> B (-> C -> D). Each node arrives on the word that names it, the link draws to it, a carrier
+     (a short text token) travels the links.
+     line = 2 or 3 nodes across with arrows; the carrier hops node to node at go_at
+     column = 2 to 4 rows on a rail; each row gets a tick when the carrier reaches it
+     loop = 3 or 4 nodes on a closed track; the carrier laps faster and faster while the centre counter climbs -->
+<html>
+<head><meta charset="UTF-8"/>
+<link rel="stylesheet" href="tokens.css"/><link rel="stylesheet" href="core/cs.css"/></head>
+<body style="margin:0;padding:0;background:transparent;">
+<div id="stage" data-composition-id="cs-flow" data-width="1080" data-height="1920" data-start="0" data-duration="5" data-track-index="0">
+<style>
+#wrap { position: relative; width: 780px; }
+#nodes { position: relative; z-index: 2; }
+#links { position: absolute; left: 0; top: 0; overflow: visible; z-index: 1; }
+#links path { fill: none; stroke: var(--cs-ink); stroke-width: var(--cs-stroke); stroke-linecap: round; stroke-linejoin: round; will-change: stroke-dashoffset; }
+#links path.track { stroke: var(--x-soft); stroke-width: calc(var(--cs-stroke) * 3); }
+#links .head { fill: var(--cs-ink); stroke: none; will-change: opacity; }
+.node { will-change: transform, opacity; }
+.node .cs-tile { width: 150px; height: 150px; }
+.num { font-family: var(--cs-font-title); font-weight: var(--x-title-weight); font-size: calc(76px * var(--x-title-scale)); line-height: 1; }
+.lb { font-weight: var(--x-strong); font-size: 50px; white-space: nowrap; text-align: center; }
+/* line: the carrier rides above the tiles and hops, the wrap holds that room so place() keeps it in the zone */
+#stage.line #wrap { padding-top: 170px; }
+#stage.line #nodes { display: flex; justify-content: space-between; align-items: flex-start; }
+#stage.line .node { display: flex; flex-direction: column; align-items: center; gap: 18px; width: 240px; }
+#stage.line .node .cs-tile { width: 184px; height: 184px; }
+#stage.line .lb { font-size: 56px; }
+/* column */
+#stage.column #nodes { display: flex; flex-direction: column; gap: 32px; padding-left: 104px; }
+#stage.column .node { display: flex; align-items: center; gap: 24px; padding: 16px 24px 16px 16px; will-change: clip-path; }
+#stage.column .node .cs-sh { filter: none; }
+#stage.column .node .cs-tile { width: 104px; height: 104px; }
+#stage.column .node .num { font-size: calc(54px * var(--x-title-scale)); }
+#stage.column .node .ml { flex: 1; min-width: 0; }
+#stage.column .lb { text-align: left; font-size: 56px; }
+.ok { width: 72px; height: 72px; border-radius: 50%; background: var(--cs-accent); display: flex; align-items: center; justify-content: center; will-change: transform, opacity; }
+.ok svg { width: 40px; height: 40px; }
+.ok path { fill: none; stroke: var(--cs-on-accent); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+/* loop */
+#stage.loop #nodes { position: relative; width: 780px; height: 720px; }
+#stage.loop .node { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 12px; width: 260px; }
+#stage.loop .node.top { flex-direction: column-reverse; }
+#stage.loop .node .cs-tile { width: 144px; height: 144px; }
+#ctr { display: none; position: absolute; left: 0; top: 0; z-index: 3; text-align: center; will-change: transform, opacity; }
+#stage.loop #ctr { display: block; }
+#cv { font-family: var(--cs-font-title); font-weight: var(--x-title-weight); font-size: calc(124px * var(--x-title-scale)); line-height: 1; letter-spacing: var(--x-title-track); }
+/* the carrier */
+#car { position: absolute; left: 0; top: 0; z-index: 4; will-change: transform, opacity; filter: drop-shadow(var(--x-shadow)); }
+#car .tok { display: inline-flex; align-items: center; padding: 12px 26px; border-radius: 999px; background: var(--cs-accent); color: var(--cs-on-accent);
+  font-weight: var(--x-strong); font-size: 46px; white-space: nowrap; }
+</style>
+<div id="zone"><div id="cam"><div id="wrap">
+  <svg id="links"></svg>
+  <div id="nodes"></div>
+  <div id="ctr"><div id="cv" class="cs-num"></div><div class="ml"><span class="mi cs-eyebrow" id="cl"></span></div></div>
+  <div id="car"></div>
+</div></div></div>
+<script src="core/gsap.min.js"></script>
+<script src="core/cs.js"></script>
+<script>
+CS.comp('flow', function (v, c, tl) {
+  var variant = CS.pick(v.variant, ['line', 'column', 'loop']);
+  c.stage.classList.add(variant);
+  var labels = CS.list(v.nodes).slice(0, variant === 'line' ? 3 : 4), images = String(v.images || '').split('|').map(function (s) { return s.trim(); });
+  var n = Math.max(2, labels.length), NS = 'http://www.w3.org/2000/svg';
+  while (labels.length < n) labels.push('');
+  var TICK = '<svg viewBox="0 0 40 40"><path d="M8 21 L17 30 L33 11"/></svg>';
+  var wrap = document.getElementById('wrap');
+  function centre(el) { var x = 0, y = 0, e = el; while (e && e !== wrap) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return [x + el.offsetWidth / 2, y + el.offsetHeight / 2, el.offsetWidth, el.offsetHeight]; }
+  var at = CS.times('at', n, 0.2, 0.5);
+  document.getElementById('nodes').innerHTML = labels.map(function (lab, i) {
+    return '<div class="node' + (variant === 'column' ? ' cs-card' : '') + '" id="nd' + i + '"><div class="cs-sh"><div class="cs-tile" id="tile' + i + '"></div></div>' +
+      '<div class="ml"><span class="mi lb">' + CS.esc(lab) + '</span></div>' + (variant === 'column' ? '<span class="ok" id="ok' + i + '">' + TICK + '</span>' : '') + '</div>';
+  }).join('');
+  labels.forEach(function (lab, i) {
+    var t = document.getElementById('tile' + i);
+    if (images[i]) CS.tile(t, images[i], lab, i);
+    else t.innerHTML = '<span class="num">' + (i + 1) + '</span>';
+  });
+  // loop: a stadium track; nodes on its straight edges, labels outside the track, the counter alone in the middle
+  var LOOP = { x0: 80, x1: 700, y0: 170, y1: 550 }, LR = (LOOP.y1 - LOOP.y0) / 2;
+  var LP = { 2: [[390, LOOP.y0], [390, LOOP.y1]], 3: [[LOOP.x0 + LR, LOOP.y0], [LOOP.x1 - LR, LOOP.y0], [390, LOOP.y1]],
+             4: [[LOOP.x0 + LR, LOOP.y0], [LOOP.x1 - LR, LOOP.y0], [LOOP.x1 - LR, LOOP.y1], [LOOP.x0 + LR, LOOP.y1]] }[n];
+  if (variant === 'loop') labels.forEach(function (lab, i) {
+    var el = document.getElementById('nd' + i), top = LP[i][1] === LOOP.y0, labH = el.querySelector('.ml').offsetHeight;
+    if (top) el.classList.add('top');
+    el.style.left = (LP[i][0] - 130) + 'px';
+    el.style.top = (top ? LP[i][1] - 72 - 12 - labH : LP[i][1] - 72) + 'px';
+  });
+  // column labels share one size that fits every card on one line
+  if (variant === 'column') {
+    var lbs = document.querySelectorAll('.lb'), fit = 56;
+    lbs.forEach(function (e) { fit = Math.min(fit, CS.fitWidth(e, e.parentNode.clientWidth, [56, 52, 48, 44])); });
+    lbs.forEach(function (e) { e.style.fontSize = fit + 'px'; });
+  }
+  var W = wrap.offsetWidth, H = wrap.offsetHeight, svg = document.getElementById('links');
+  svg.setAttribute('width', W); svg.setAttribute('height', H); svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.innerHTML = '';
+  var tiles = labels.map(function (l, i) { return centre(document.getElementById('tile' + i)); });
+  var car = document.getElementById('car');
+  car.innerHTML = '<span class="tok">' + CS.esc(v.carrier || '') + '</span>';
+  var cw = car.offsetWidth, ch = car.offsetHeight;
+  gsap.set(car, { opacity: 0 });
+  labels.forEach(function (lab, i) {
+    var el = document.getElementById('nd' + i);
+    if (variant === 'column') CS.surfaceIn(tl, el, at[i], { plate: true });
+    else { var sh = el.querySelector('.cs-sh'); gsap.set(sh, { opacity: 0, scale: 0.84, y: 20 }); tl.to(sh, { opacity: 1, scale: 1, y: 0, duration: CS.S.medium, ease: CS.EASE.enter }, at[i]); }
+    CS.linesIn(tl, el.querySelectorAll('.mi'), at[i] + 0.12);
+  });
+  var last = at[n - 1];
+  function mkPath(d, cls) { var p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); if (cls) p.setAttribute('class', cls); svg.appendChild(p); return p; }
+  function draw(p, when) { var L = p.getTotalLength(); gsap.set(p, { strokeDasharray: L, strokeDashoffset: L }); tl.to(p, { strokeDashoffset: 0, duration: 0.45, ease: CS.EASE.enter }, when); }
+  if (variant !== 'loop') {
+    for (var i = 1; i < n; i++) {
+      var a = tiles[i - 1], b = tiles[i];
+      var d = variant === 'line' ? 'M' + (a[0] + a[2] / 2 + 16) + ' ' + a[1] + ' L' + (b[0] - b[2] / 2 - 24) + ' ' + b[1] : 'M56 ' + (a[1] + 30) + ' L56 ' + (b[1] - 40);
+      var p = mkPath(d), w0 = Math.max(0, at[i] - 0.3); draw(p, w0);
+      // an arrowhead at the end of each link
+      var e = p.getPointAtLength(p.getTotalLength()), hd = document.createElementNS(NS, 'path');
+      hd.setAttribute('class', 'head');
+      hd.setAttribute('d', variant === 'line' ? 'M' + (e.x + 16) + ' ' + e.y + ' L' + (e.x - 6) + ' ' + (e.y - 15) + ' L' + (e.x - 6) + ' ' + (e.y + 15) + ' Z'
+                                             : 'M' + e.x + ' ' + (e.y + 18) + ' L' + (e.x - 15) + ' ' + (e.y - 4) + ' L' + (e.x + 15) + ' ' + (e.y - 4) + ' Z');
+      svg.appendChild(hd); gsap.set(hd, { opacity: 0 }); tl.to(hd, { opacity: 1, duration: CS.S.micro, ease: CS.EASE.settle }, w0 + 0.36);
+    }
+    // the carrier sits on node 0, then travels each link at go_at[k] (line: it hops in an arc)
+    var go = CS.times('go_at', n - 1, last + 0.4, 1.0), st = {}, val = 0;
+    var pts = variant === 'line' ? tiles.map(function (t) { return [t[0], t[1] - t[3] / 2 - ch / 2 - 12]; }) : tiles.map(function (t) { return [56, t[1]]; });
+    Object.defineProperty(st, 'p', { get: function () { return val; }, set: function (x) {
+      val = x; var k = Math.min(n - 2, Math.floor(x)), f = Math.max(0, Math.min(1, x - k)), A = pts[k], B = pts[k + 1];
+      gsap.set(car, { x: A[0] + (B[0] - A[0]) * f - cw / 2, y: A[1] + (B[1] - A[1]) * f - ch / 2 + (variant === 'line' ? -Math.sin(f * Math.PI) * 60 : 0) });
+    } });
+    st.p = 0;
+    tl.to(car, { opacity: 1, duration: CS.S.short, ease: CS.EASE.settle }, Math.max(0, go[0] - 0.4));
+    if (variant === 'column') CS.settle(tl, '#ok0', Math.max(0, go[0] - 0.35), { scale: true });
+    for (var k = 0; k < n - 1; k++) {
+      tl.to(st, { p: k + 1, duration: 1.0, ease: CS.EASE.travel }, go[k]);
+      if (variant === 'column') CS.settle(tl, '#ok' + (k + 1), go[k] + 0.95, { scale: true });
+      else CS.emphasis(tl, '#tile' + (k + 1), go[k] + 0.9, { scale: 1.06 });
+    }
+    last = go[n - 2] + 1.0;
+  } else {
+    var dd = 'M' + LP[0][0] + ' ' + LOOP.y0 + ' L' + (LOOP.x1 - LR) + ' ' + LOOP.y0 + ' A' + LR + ' ' + LR + ' 0 0 1 ' + (LOOP.x1 - LR) + ' ' + LOOP.y1 +
+             ' L' + (LOOP.x0 + LR) + ' ' + LOOP.y1 + ' A' + LR + ' ' + LR + ' 0 0 1 ' + (LOOP.x0 + LR) + ' ' + LOOP.y0 + ' L' + LP[0][0] + ' ' + LOOP.y0;
+    var track = mkPath(dd, 'track'), ring = mkPath(dd);
+    draw(track, at[0] + 0.1); draw(ring, at[n - 1]);
+    var ctr = document.getElementById('ctr'), cvEl = document.getElementById('cv'), cto = parseFloat(v.count_to) || 0;
+    document.getElementById('cl').textContent = v.count_label || '';
+    cvEl.textContent = CS.fmt(cto, 0);
+    gsap.set(ctr, { x: 390 - ctr.offsetWidth / 2, y: (LOOP.y0 + LOOP.y1) / 2 - ctr.offsetHeight / 2 });
+    cvEl.textContent = '0';
+    var ra = CS.t('run_at', 1.6), sa = parseFloat(v.stop_at), end = isNaN(sa) ? c.dur - 0.25 : Math.min(sa, c.dur - 0.25);
+    var laps = Math.max(1, parseFloat(v.laps) || 6), L = ring.getTotalLength(), stl = {}, pv = 0;
+    Object.defineProperty(stl, 'p', { get: function () { return pv; }, set: function (x) {
+      pv = x; var pt = ring.getPointAtLength((x % 1) * L);
+      gsap.set(car, { x: pt.x - cw / 2, y: pt.y - ch / 2 });
+      cvEl.textContent = CS.fmt(Math.round(cto * Math.min(1, x / laps)), 0);
+    } });
+    stl.p = 0;
+    CS.settle(tl, ctr, Math.max(0, ra - 0.5), { scale: true });
+    CS.linesIn(tl, '#cl', Math.max(0, ra - 0.4));
+    tl.to(car, { opacity: 1, duration: CS.S.short, ease: CS.EASE.settle }, Math.max(0, ra - 0.3));
+    // the laps accelerate, then everything stops dead at stop_at
+    tl.to(stl, { p: laps, duration: Math.max(0.6, end - ra), ease: CS.EASE.exit }, ra);
+    if (!isNaN(sa)) CS.emphasis(tl, ctr, end, { scale: 1.06 });
+    last = end;
+  }
+  CS.place(wrap, { max: 1.1 });
+  CS.breath(tl, '#cam', Math.min(c.dur - 1.2, last + 0.3), c.dur, 0.012);
+  CS.ending(tl, '#wrap');
+});
+</script>
+</div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+{
+  "name": "compare",
+  "label": "Two things, one decision: side by side, a race, or a myth struck out and replaced",
+  "kind": "both",
+  "zones": ["split", "full"],
+  "duration": 5,
+  "vars": {
+    "variant": { "type": "enum", "values": ["strike", "split", "race"], "default": "strike", "label": "strike = not A but B, split = two cards and a verdict, race = two bars and two timers" },
+    "a_name": { "type": "string", "default": "Plan for a month", "label": "A, 1 to 3 words" },
+    "a_sub": { "type": "string", "default": "and never start", "label": "A, one short line (blank hides)" },
+    "a_image": { "type": "image", "default": "", "label": "A, optional image" },
+    "b_name": { "type": "string", "default": "Ship it ugly", "label": "B, 1 to 3 words" },
+    "b_sub": { "type": "string", "default": "then fix what people use", "label": "B, one short line (blank hides)" },
+    "b_image": { "type": "image", "default": "", "label": "B, optional image" },
+    "a_at": { "type": "time", "default": 0.2, "label": "When A arrives" },
+    "b_at": { "type": "time", "default": 2.0, "label": "When B arrives" },
+    "strike_at": { "type": "time", "default": 1.2, "label": "strike: when A is struck out" },
+    "vs": { "type": "string", "default": "vs", "label": "split: the word between the cards" },
+    "win": { "type": "enum", "values": ["", "a", "b"], "default": "", "label": "split: the winner, a or b (blank = none)" },
+    "win_at": { "type": "time", "default": 2.8, "label": "split: when the verdict lands" },
+    "a_value": { "type": "number", "default": 40.5, "label": "race: A's value" },
+    "b_value": { "type": "number", "default": 23.0, "label": "race: B's value" },
+    "unit": { "type": "string", "default": "s", "label": "race: unit after the number" },
+    "decimals": { "type": "number", "default": 1, "label": "race: decimals" },
+    "race_at": { "type": "time", "default": 1.0, "label": "race: the start" },
+    "race_dur": { "type": "number", "default": 2.6, "label": "race: seconds the slower lane takes" },
+    "win_label": { "type": "string", "default": "faster", "label": "race: the chip on the winner" },
+    "out": { "type": "enum", "values": ["cut", "edge"], "default": "cut", "label": "cut = hold to the end, edge = leave" },
+    "out_at": { "type": "time", "default": "", "label": "edge: when it leaves (blank = end)" }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "logo-row",
+  "label": "The things involved, each arriving on the word that names it: your own images or plain text chips",
+  "kind": "both",
+  "zones": ["split", "full"],
+  "duration": 5,
+  "vars": {
+    "variant": { "type": "enum", "values": ["row", "hub", "chips"], "default": "row", "label": "row = tiles with names, hub = a centre node linked to each item, chips = text chips that land in a row" },
+    "names": { "type": "string", "default": "Notes|Calendar|Mail", "label": "Names, | separated (1 to 4)" },
+    "images": { "type": "images", "default": "", "label": "Optional images (logos you own or may show), | separated, same order as names. Blank = initials" },
+    "at": { "type": "time", "default": "0.4|1.2|2.0", "label": "When each item lands, | separated" },
+    "label": { "type": "string", "default": "One app replaced", "label": "Optional label, at most 5 words" },
+    "label_at": { "type": "time", "default": 0.1, "label": "When the label rises" },
+    "centre": { "type": "string", "default": "one inbox", "label": "hub: the centre node, 1 or 2 words" },
+    "centre_at": { "type": "time", "default": 0.2, "label": "hub: when the centre node arrives" },
+    "out": { "type": "enum", "values": ["cut", "edge"], "default": "cut", "label": "cut = hold to the end, edge = leave by its edge" },
+    "out_at": { "type": "time", "default": "", "label": "edge: when it leaves (blank = end)" }
+  }
+}

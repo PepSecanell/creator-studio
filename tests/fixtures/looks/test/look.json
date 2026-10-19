@@ -1,0 +1,11 @@
+{
+  "schema": "creator-look/v1", "id": "test", "label": "Test",
+  "fonts": { "title": "fonts/missing.ttf", "caption": "fonts/missing.ttf", "body": "fonts/missing.ttf", "hand": "fonts/missing.ttf" },
+  "palette_defaults": { "ground": "#F7F5EF", "ink": "#22305A", "accent": "#FBE27A", "accent_2": "#E8553D", "muted": "#8A8F9C", "on_accent": "#22305A" },
+  "captions": { "shape": "pill", "fill": "ground", "text": "ink", "emphasis": "accent", "emphasis_mode": "marker", "size": 64, "y": 0.68, "max_words": 4 },
+  "hook_card": { "shape": "strip", "fill": "accent", "text": "on_accent" },
+  "end_card": { "fill": "ground", "text": "ink", "show_logo": true, "show_cta": true },
+  "layouts": ["face", "split", "graphic", "title"],
+  "cover": { "layout": "face_words", "max_words": 5 },
+  "motion": "tokens.css"
+}

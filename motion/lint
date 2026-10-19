@@ -1,0 +1,3 @@
+#!/bin/sh
+# lint: see README.md
+exec node "$(dirname "$0")/lint.mjs" "$@"

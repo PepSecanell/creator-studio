@@ -1,0 +1,1 @@
+{ "variant": "window", "title": "build.sh", "cmd": "npm run deploy", "lines": "# building 14 pages|+ tests passed|+ uploaded in 9s|! live at example.com", "hot": "live", "hot_at": 3.6 }

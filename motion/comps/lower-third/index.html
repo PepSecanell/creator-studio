@@ -1,0 +1,81 @@
+<!doctype html>
+<!-- lower-third: who is talking. A name and one line, low in the frame, on its own plate so it reads over any
+     footage. It arrives by a masked edge, holds, and by default leaves the same way just before the end.
+     plate = a paper plate with an accent edge that draws first
+     dark = an ink plate, ground type, an accent rule under the name
+     tag = the name on a chip, the line written under it in the hand face -->
+<html>
+<head><meta charset="UTF-8"/>
+<link rel="stylesheet" href="tokens.css"/><link rel="stylesheet" href="core/cs.css"/></head>
+<body style="margin:0;padding:0;background:transparent;">
+<div id="stage" data-composition-id="cs-lower-third" data-width="1920" data-height="1080" data-start="0" data-duration="5" data-track-index="0">
+<style>
+#wrap { position: relative; display: inline-block; }
+#plate { position: relative; display: flex; align-items: stretch; }
+#edge { width: calc(var(--cs-stroke) * 3); background: var(--cs-accent); border-radius: var(--cs-radius) 0 0 var(--cs-radius); transform-origin: 50% 100%; will-change: transform; }
+#body { padding: 26px 48px 30px 36px; }
+#name { font-family: var(--cs-font-title); font-weight: var(--x-title-weight); text-transform: var(--x-title-case); letter-spacing: var(--x-title-track);
+  font-size: calc(72px * var(--x-title-scale)); line-height: 1.04; white-space: nowrap; }
+#role { margin-top: 8px; font-size: 38px; font-weight: var(--x-body-weight); color: var(--x-ink2); white-space: nowrap; }
+#rule { display: none; height: var(--cs-stroke); width: 120px; background: var(--cs-accent); margin-top: 14px; transform-origin: 0 50%; will-change: transform; }
+/* plate */
+#stage.plate #plate { border-radius: var(--cs-radius); }
+#stage.plate #body { border-radius: 0 var(--cs-radius) var(--cs-radius) 0; border-left: none; }
+/* dark */
+#stage.dark #edge { display: none; }
+#stage.dark #role { color: var(--x-on-dark2); }
+#stage.dark #rule { display: block; }
+/* tag */
+#stage.tag #edge { display: none; }
+#stage.tag #plate { flex-direction: column; align-items: flex-start; }
+#stage.tag #body { padding: 0; background: none; border: none; }
+#stage.tag .cs-sh { filter: none; }
+#stage.tag #name { display: inline-block; background: var(--x-dark); color: var(--x-on-dark); padding: 14px 32px 16px; border-radius: var(--cs-radius); filter: drop-shadow(var(--x-shadow)); }
+#stage.tag #role { font-family: var(--x-font-hand); font-style: var(--x-hand-style); font-weight: 700; font-size: calc(40px * var(--x-hand-scale)); color: var(--cs-ink);
+  margin: 12px 0 0 10px; padding: 4px 16px; background: color-mix(in srgb, var(--cs-ground) 88%, transparent); border-radius: calc(var(--cs-radius) * 0.6); }
+#stage.side-right #plate { flex-direction: row-reverse; }
+#stage.side-right #edge { border-radius: 0 var(--cs-radius) var(--cs-radius) 0; }
+#stage.side-right.tag #plate { align-items: flex-end; }
+</style>
+<div id="zone"><div id="cam"><div id="wrap">
+  <div class="cs-sh"><div id="plate"><i id="edge"></i><div id="body">
+    <div class="ml"><span class="mi" id="name"></span></div>
+    <i id="rule"></i>
+    <div class="ml"><span class="mi" id="role"></span></div>
+  </div></div></div>
+</div></div></div>
+<script src="core/gsap.min.js"></script>
+<script src="core/cs.js"></script>
+<script>
+CS.comp('lower-third', function (v, c, tl) {
+  var variant = CS.pick(v.variant, ['plate', 'dark', 'tag']), right = CS.lower(v.side) === 'right';
+  c.stage.classList.add(variant, right ? 'side-right' : 'side-left');
+  var body = document.getElementById('body');
+  body.className = variant === 'dark' ? 'cs-dark' : (variant === 'plate' ? 'cs-card' : '');
+  document.getElementById('name').textContent = v.name || '';
+  document.getElementById('role').textContent = v.role || '';
+  document.getElementById('role').parentNode.style.display = v.role ? '' : 'none';
+  CS.fitWidth(document.getElementById('name'), c.shape === 'landscape' ? 820 : 760, CS.titleSizes([72, 66, 60, 54]));
+  CS.anchor(document.getElementById('wrap'), right ? 'bottom-right' : 'bottom-left');
+  var at = CS.t('at', 0.3), dir = right ? 'left' : 'right';
+  if (variant === 'plate') {
+    CS.reveal(tl, '#edge', at, { axis: 'y' });
+    CS.surfaceIn(tl, body, at + 0.15, { dir: dir });
+  } else if (variant === 'dark') {
+    CS.surfaceIn(tl, body, at, { dir: dir });
+    CS.reveal(tl, '#rule', at + 0.45);
+  }
+  CS.linesIn(tl, ['#name', '#role'], at + (variant === 'tag' ? 0 : 0.3), { stagger: 0.12 });
+  // a slow drift while it holds, so the plate is never a dead still
+  CS.drift(tl, '#cam', at + 1, c.dur - 0.5, { y: -4 });
+  var mode = CS.lower(v.out);
+  if (mode !== 'cut') {
+    var oa = Math.min(c.dur - CS.MASK.out, parseFloat(v.out_at) || c.dur - 0.4);
+    CS.surfaceOut(tl, '#plate', oa, { dir: right ? 'right' : 'left' });
+  }
+  tl.set({}, {}, c.dur);
+});
+</script>
+</div>
+</body>
+</html>

@@ -1,0 +1,52 @@
+/* Notebook look: paper ground, ink type, one word on a hand swiped marker.
+ * The six palette roles come first: `./studio brand build` replaces them with the brand's palette.
+ * Every other colour below is mixed from those six, so a new palette keeps the look intact. */
+:root {
+  --cs-ground: #F7F4EC;
+  --cs-ink: #26324F;
+  --cs-accent: #FFE066;
+  --cs-accent-2: #E4573D;
+  --cs-muted: #8A8F9C;
+  --cs-on-accent: #26324F;
+
+  --cs-font-title: 'Newsreader', Georgia, serif;
+  --cs-font-body: 'Inter', system-ui, sans-serif;
+  --cs-font-hand: 'Caveat', 'Comic Sans MS', cursive;
+  --cs-hand-scale: 1.38;
+  --cs-hand-style: normal;
+  --cs-radius: 18px;
+  --cs-stroke: 4px;
+
+  /* type */
+  --cs-title-weight: 600;
+  --cs-title-case: none;
+  --cs-title-track: -0.012em;
+  --cs-title-lead: 1.05;
+  --cs-title-scale: 1;
+  --cs-strong-weight: 700;
+  --cs-body-weight: 600;
+
+  /* surfaces: a sheet of ruled paper with a margin line, lifted off the desk */
+  --cs-surface: color-mix(in srgb, var(--cs-ground) 55%, white);
+  --cs-surface-pattern:
+    linear-gradient(to right, transparent 0 16px, color-mix(in srgb, var(--cs-accent-2) 38%, transparent) 16px 19px, transparent 19px),
+    repeating-linear-gradient(to bottom, transparent 0 63px, color-mix(in srgb, var(--cs-ink) 8%, transparent) 63px 65px);
+  --cs-edge: color-mix(in srgb, var(--cs-ink) 12%, var(--cs-ground));
+  --cs-border-width: 2px;
+  --cs-shadow: 0 22px 34px color-mix(in srgb, var(--cs-ink) 22%, transparent);
+
+  /* the marker: a highlighter stroke with uneven edges, a touch of tilt, ink stays ink */
+  --cs-mark-color: var(--cs-accent);
+  --cs-mark-text: var(--cs-ink);
+  --cs-mark-top: 18%;
+  --cs-mark-bottom: 2%;
+  --cs-mark-radius: 3px;
+  --cs-mark-tilt: -1deg;
+  --cs-mark-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20' preserveAspectRatio='none'><path d='M1.5 4.2 C 18 1.6 34 3.4 52 2.4 S 86 1.2 99 3.1 L 98.6 16.4 C 82 18.9 63 17.2 47 18.6 S 14 17.4 0.6 18.8 Z' fill='black'/></svg>");
+}
+
+@font-face { font-family: 'Newsreader'; src: url(fonts/Newsreader-SemiBold.ttf) format('truetype'); font-weight: 500 900; font-display: block; }
+@font-face { font-family: 'Inter'; src: url(fonts/Inter-Regular.ttf) format('truetype'); font-weight: 100 450; font-display: block; }
+@font-face { font-family: 'Inter'; src: url(fonts/Inter-SemiBold.ttf) format('truetype'); font-weight: 451 650; font-display: block; }
+@font-face { font-family: 'Inter'; src: url(fonts/Inter-Bold.ttf) format('truetype'); font-weight: 651 900; font-display: block; }
+@font-face { font-family: 'Caveat'; src: url(fonts/Caveat-Bold.ttf) format('truetype'); font-weight: 100 900; font-display: block; }

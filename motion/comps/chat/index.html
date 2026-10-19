@@ -1,0 +1,160 @@
+<!doctype html>
+<!-- chat: a short exchange with an assistant. 2 to 4 messages, one bubble per word cue, about 10 words each.
+     The window grows to hold the whole exchange when it fits; when it has to scroll, a bubble that would be
+     cut by the window top leaves first (never half a bubble). A marked run never breaks across lines.
+     bubbles = on the ground: the person right (dark), the assistant left (paper) with its avatar, typing dots first
+     app = the same inside a rebuilt chat window: a header with the name, an input bar at the foot
+     prompt = one big prompt box: the message types in, send presses, the answer card rises under it -->
+<html>
+<head><meta charset="UTF-8"/>
+<link rel="stylesheet" href="tokens.css"/><link rel="stylesheet" href="core/cs.css"/></head>
+<body style="margin:0;padding:0;background:transparent;">
+<div id="stage" data-composition-id="cs-chat" data-width="1080" data-height="1920" data-start="0" data-duration="5" data-track-index="0">
+<style>
+#wrap { position: relative; width: 800px; }
+#stage.zone-full #wrap { width: 740px; }
+#frame { position: relative; }
+#win { position: relative; overflow: hidden; -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 70px); mask-image: linear-gradient(to bottom, transparent 0, black 70px); }
+#log { position: absolute; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; gap: 36px; padding: 32px 8px 12px; will-change: transform; }
+.msg { position: relative; display: flex; align-items: flex-end; gap: 16px; will-change: transform, opacity; }
+.msg.me { justify-content: flex-end; }
+.msg .cs-tile { width: 84px; height: 84px; }
+.bub { max-width: 600px; padding: 24px 32px; font-weight: var(--x-strong); font-size: 52px; line-height: 1.22; border-radius: calc(var(--cs-radius) * 2.2); }
+#stage.zone-full .bub { max-width: 540px; }
+.me .bub { background: var(--x-dark); color: var(--x-on-dark); border-bottom-right-radius: 6px; }
+.ai .bub { background: var(--x-surface); border: var(--x-border-w) solid var(--x-edge); border-bottom-left-radius: 6px; }
+.bub .hl, .bub .glue { white-space: nowrap; }
+.bw { filter: drop-shadow(var(--x-shadow)); }
+.dotw { position: absolute; left: 100px; bottom: 0; will-change: transform, opacity; }
+.dots { display: flex; gap: 12px; padding: 26px 32px; }
+.dots i { width: 18px; height: 18px; border-radius: 50%; background: var(--cs-ink); opacity: .5; will-change: transform; }
+/* app */
+#apphead { display: none; align-items: center; gap: 16px; padding: 24px 32px; border-bottom: 2px solid var(--x-line); }
+#apphead .cs-tile { width: 80px; height: 80px; }
+#hn { font-size: 48px; font-weight: var(--x-strong); }
+#inbar { display: none; margin: 16px 24px 24px; padding: 14px 14px 14px 32px; border-radius: 999px; background: var(--x-soft); align-items: center; justify-content: space-between; }
+#stage.app #apphead, #stage.app #inbar { display: flex; }
+#stage.app #log { padding-left: 24px; padding-right: 24px; }
+.send { width: 72px; height: 72px; border-radius: 50%; background: var(--x-dark); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; will-change: transform; }
+.send svg { width: 36px; height: 36px; }
+.send path { fill: none; stroke: var(--x-on-dark); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+/* prompt */
+#prompt { display: none; }
+#stage.prompt #prompt { display: block; }
+#stage.prompt #fsh { display: none; }
+#pbox { padding: 32px 32px 24px; }
+#pq { font-weight: var(--x-strong); font-size: 56px; line-height: 1.2; min-height: 2.4em; margin-top: 12px; }
+#pcaret { display: inline-block; width: 5px; height: 1em; vertical-align: -0.12em; background: var(--cs-ink); margin-left: 2px; }
+#pfoot { display: flex; justify-content: flex-end; margin-top: 12px; }
+#ans { margin-top: 32px; display: flex; gap: 24px; align-items: flex-start; padding: 32px; }
+#ans .cs-tile { width: 96px; height: 96px; }
+#at { font-family: var(--cs-font-title); font-weight: var(--x-title-weight); font-size: calc(64px * var(--x-title-scale)); line-height: 1.12; letter-spacing: var(--x-title-track); flex: 1; }
+</style>
+<div id="zone"><div id="cam"><div id="wrap">
+  <div class="cs-sh" id="fsh"><div id="frame">
+    <div id="apphead"><div class="cs-tile av"></div><div class="ml"><span class="mi" id="hn"></span></div></div>
+    <div id="win"><div id="log"></div></div>
+    <div id="inbar"><span class="cs-meta">Message</span><span class="send"><svg viewBox="0 0 36 36"><path d="M18 30 V8 M8 17 L18 7 L28 17"/></svg></span></div>
+  </div></div>
+  <div id="prompt">
+    <div class="cs-sh"><div class="cs-card" id="pbox"><div class="ml"><span class="mi cs-eyebrow" id="pl"></span></div><div id="pq"><span id="pqt"></span><span id="pcaret"></span></div>
+      <div id="pfoot"><span class="send" id="psend"><svg viewBox="0 0 36 36"><path d="M18 30 V8 M8 17 L18 7 L28 17"/></svg></span></div></div></div>
+    <div class="cs-sh"><div class="cs-card" id="ans"><div class="cs-tile av" id="atile"></div><div id="at"></div></div></div>
+  </div>
+</div></div></div>
+<script src="core/gsap.min.js"></script>
+<script src="core/cs.js"></script>
+<script>
+CS.comp('chat', function (v, c, tl) {
+  var variant = CS.pick(v.variant, ['bubbles', 'app', 'prompt']);
+  c.stage.classList.add(variant);
+  var msgs = CS.list(v.msgs).slice(0, 4).map(function (m) { var w = /^\s*(me|ai)\s*:\s*/i.exec(m); return { who: w ? w[1].toLowerCase() : 'me', t: w ? m.slice(w[0].length) : m }; });
+  var typing = CS.lower(v.typing) !== 'no';
+  var at = CS.times('at', msgs.length, 0.3, 1.4), ha = CS.t('hot_at', 2.8), last = at[at.length - 1];
+  function avatars() { document.querySelectorAll('.av').forEach(function (e) { CS.tile(e, v.image, v.name || 'Assistant', 1); }); }
+  if (variant === 'prompt') {
+    avatars();
+    var me = msgs.filter(function (m) { return m.who === 'me'; })[0] || { t: '' }, ai = msgs.filter(function (m) { return m.who === 'ai'; })[0] || { t: '' };
+    var meAt = at[msgs.indexOf(me)] || at[0], aiAt = at[msgs.indexOf(ai)] || at[1] || meAt + 1.5;
+    document.getElementById('pl').textContent = 'Ask ' + (v.name || 'Assistant');
+    var r = CS.rich(document.getElementById('at'), ai.t, CS.list(v.hot).slice(0, 1));
+    document.getElementById('pqt').textContent = me.t;   // measure with the whole question in place
+    CS.place(document.getElementById('wrap'), { max: 1.1 });
+    CS.surfaceIn(tl, '#pbox', Math.max(0, meAt - 0.35), { dir: 'down' });
+    CS.linesIn(tl, '#pl', Math.max(0, meAt - 0.2));
+    var td = Math.min(1.4, Math.max(0.5, me.t.length * 0.035));
+    CS.typeOn(tl, document.getElementById('pqt'), me.t, meAt, td);
+    tl.set('#pcaret', { opacity: 0 }, meAt + td + 0.2);
+    tl.to('#psend', { scale: 0.86, duration: 0.1, ease: CS.EASE.exit }, Math.min(aiAt - 0.4, meAt + td + 0.15));
+    tl.to('#psend', { scale: 1, duration: CS.S.micro, ease: CS.EASE.settle }, Math.min(aiAt - 0.3, meAt + td + 0.25));
+    CS.surfaceIn(tl, '#ans', aiAt, { dir: 'down' });
+    CS.settle(tl, '#atile', aiAt + 0.15, { scale: true });
+    CS.linesIn(tl, r.inner, aiAt + 0.25);
+    if (r.marks[0] && r.marks[0].length) CS.swipeAll(tl, r.marks[0], Math.max(aiAt + 0.7, ha), CS.S.short * r.marks[0].length);
+    last = aiAt;
+  } else {
+    document.getElementById('hn').textContent = v.name || 'Assistant';
+    var log = document.getElementById('log'), html = '';
+    msgs.forEach(function (m, i) {
+      var body = m.who === 'ai' ? CS.marked(m.t, v.hot) : CS.esc(m.t);
+      // a marked run is one unbroken box: the punctuation after it stays on its line
+      body = body.replace(/(<span class="hl">[\s\S]*?<span class="mko"[^>]*>[\s\S]*?<\/span><\/span>)([.,!?;:]+)/g, '<span class="glue">$1$2</span>');
+      html += '<div class="msg ' + m.who + '" id="m' + i + '">' + (m.who === 'ai' ? '<div class="cs-tile av"></div>' : '') +
+        '<div class="bw" id="bw' + i + '"><div class="bub">' + body + '</div></div>' +
+        (m.who === 'ai' && typing ? '<div class="bw dotw" id="ty' + i + '"><div class="bub dots"><i></i><i></i><i></i></div></div>' : '') + '</div>';
+    });
+    log.innerHTML = html;
+    avatars();
+    // the window is as tall as the whole exchange when that fits, capped per zone
+    var win = document.getElementById('win'), cap = c.zone === 'full' ? (variant === 'app' ? 720 : 820) : (variant === 'app' ? 430 : 580);
+    var LH = log.offsetHeight, H = Math.min(cap, LH + 48);
+    win.style.height = H + 'px';
+    if (variant === 'app') document.getElementById('frame').classList.add('cs-card');
+    // the stack is bottom anchored: before message i lands, everything after it sits below the window
+    var nodes = [].slice.call(log.children), gone = [];
+    function below(el) { return Math.max(0, LH - (el.offsetTop + el.offsetHeight) - 12); }
+    gsap.set(log, { y: below(nodes[0]) });
+    function scrollTo(el, when) {
+      var y = below(el);
+      tl.to(log, { y: y, duration: CS.S.medium, ease: CS.EASE.travel }, when);
+      nodes.forEach(function (nd, j) {
+        if (gone[j] || nd === el) return;
+        if (H - LH + y + nd.offsetTop < 30) { gone[j] = 1; tl.to(nd, { opacity: 0, duration: CS.S.short, ease: CS.EASE.exit }, Math.max(0, when - 0.05)); }
+      });
+    }
+    if (variant === 'app') {
+      CS.surfaceIn(tl, '#frame', Math.max(0, at[0] - 0.4), { dir: 'down' });
+      CS.settle(tl, '#apphead .cs-tile', Math.max(0, at[0] - 0.2), { scale: true });
+      CS.linesIn(tl, '#hn', Math.max(0, at[0] - 0.2));
+    }
+    msgs.forEach(function (m, i) {
+      var el = document.getElementById('m' + i), ty = document.getElementById('ty' + i), orig = m.who === 'me' ? '100% 100%' : '0% 100%';
+      if (ty) {
+        var tAt = Math.max(at[i] - 0.75, i ? at[i - 1] + 0.4 : 0), bw = document.getElementById('bw' + i);
+        gsap.set(ty, { opacity: 0, scale: 0.9, transformOrigin: orig });
+        scrollTo(el, tAt);
+        gsap.set(bw, { opacity: 0, scale: 0.9, transformOrigin: orig });
+        tl.set(bw, { opacity: 1 }, at[i]);
+        tl.to(ty, { opacity: 1, scale: 1, duration: CS.S.short, ease: CS.EASE.settle }, tAt);
+        ty.querySelectorAll('i').forEach(function (d, k) { tl.to(d, { y: -8, duration: 0.19, ease: CS.EASE.emphasis, yoyo: true, repeat: 1 }, tAt + 0.1 + k * 0.12); });
+        tl.to(ty, { opacity: 0, duration: CS.S.micro, ease: CS.EASE.exit }, at[i] - 0.05);
+        tl.to(bw, { scale: 1, duration: CS.S.medium, ease: CS.EASE.enter }, at[i]);
+        CS.settle(tl, el.querySelector('.cs-tile'), Math.max(0, at[i] - 0.75), { scale: true });
+      } else {
+        // a message without dots lands as a whole row
+        scrollTo(el, Math.max(0, at[i] - 0.05));
+        gsap.set(el, { opacity: 0, scale: 0.9, transformOrigin: orig });
+        tl.to(el, { opacity: 1, scale: 1, duration: CS.S.medium, ease: CS.EASE.enter }, at[i]);
+      }
+      var mk = [].slice.call(el.querySelectorAll('.mk'));
+      if (mk.length) CS.swipeAll(tl, mk, Math.max(at[i] + 0.6, ha));
+    });
+    CS.place(document.getElementById('wrap'), { max: 1.1 });
+  }
+  CS.breath(tl, '#cam', last + 0.6, c.dur, 0.015);
+  CS.ending(tl, '#wrap');
+});
+</script>
+</div>
+</body>
+</html>

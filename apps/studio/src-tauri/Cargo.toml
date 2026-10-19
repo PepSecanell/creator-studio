@@ -1,0 +1,20 @@
+[package]
+name = "studio"
+version = "0.1.0"
+description = "Plan, write and film short and long videos for your brand"
+edition = "2021"
+license = "MIT"
+
+[lib]
+name = "studio_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["protocol-asset"] }
+serde = { version = "1", features = ["derive"] }
+# preserve_order: files in the workspace are shared with the pipeline. Keys must stay in the order
+# they were written, or every save would reshuffle someone else's file.
+serde_json = { version = "1", features = ["preserve_order"] }

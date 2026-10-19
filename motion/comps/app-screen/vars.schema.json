@@ -1,0 +1,24 @@
+{
+  "name": "app-screen",
+  "label": "A rebuilt app screen where ONE thing happens on the word: a badge lands, a toggle turns on, a row is marked",
+  "kind": "both",
+  "zones": ["split", "full"],
+  "duration": 5,
+  "vars": {
+    "variant": { "type": "enum", "values": ["phone", "sheet", "browser"], "default": "phone", "label": "phone = a phone rising from below, sheet = a settings panel, browser = a browser window" },
+    "image": { "type": "image", "default": "", "label": "The app's icon (blank = its initial)" },
+    "app": { "type": "string", "default": "Habits", "label": "App name" },
+    "title": { "type": "string", "default": "", "label": "Screen title (sheet and browser; blank = the app name)" },
+    "url": { "type": "string", "default": "example.com", "label": "browser: the address" },
+    "rows": { "type": "string", "default": "Morning walk;7 days in a row;on|Read 10 pages;3 days;toggle|Drink water;today", "label": "Rows Label;sub;control|... (control = toggle, on, a short value, or blank)" },
+    "hot_row": { "type": "number", "default": 2, "label": "The row the action lands on (1 = first)" },
+    "action": { "type": "enum", "values": ["toggle", "badge", "highlight", "none"], "default": "toggle", "label": "What happens on the word" },
+    "badge": { "type": "string", "default": "New", "label": "badge: the text, 1 to 3 words" },
+    "screen_at": { "type": "time", "default": 0.1, "label": "When the screen arrives" },
+    "action_at": { "type": "time", "default": 1.4, "label": "When the action happens" },
+    "tap_at": { "type": "time", "default": "", "label": "When a cursor taps the hot thing (blank = no tap)" },
+    "pop": { "type": "string", "default": "", "label": "What the tap opens: title|one line (blank = nothing)" },
+    "out": { "type": "enum", "values": ["cut", "edge"], "default": "cut", "label": "cut = hold to the end, edge = leave" },
+    "out_at": { "type": "time", "default": "", "label": "edge: when it leaves (blank = end)" }
+  }
+}

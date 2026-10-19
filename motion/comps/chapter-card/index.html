@@ -1,0 +1,93 @@
+<!doctype html>
+<!-- chapter-card: a chapter opens. Its number and title, big, for 2 to 3 seconds, then it leaves by its edge.
+     number = a huge numeral, a rule draws, the title rises beside it
+     stack = a small eyebrow ("Part 2") over a big title, the key word marked
+     panel = a card slides in from the side (sits beside the speaker in the split zone) -->
+<html>
+<head><meta charset="UTF-8"/>
+<link rel="stylesheet" href="tokens.css"/><link rel="stylesheet" href="core/cs.css"/></head>
+<body style="margin:0;padding:0;background:transparent;">
+<div id="stage" data-composition-id="cs-chapter-card" data-width="1920" data-height="1080" data-start="0" data-duration="3" data-track-index="0">
+<style>
+#wrap { position: relative; }
+.ttl { font-family: var(--cs-font-title); font-weight: var(--x-title-weight); text-transform: var(--x-title-case); letter-spacing: var(--x-title-track); line-height: var(--x-title-lead); }
+/* number */
+#num { display: none; align-items: center; gap: 56px; }
+#stage.number #num { display: flex; }
+#big { font-family: var(--cs-font-title); font-weight: var(--x-title-weight); font-size: calc(380px * var(--x-title-scale)); line-height: 0.82; color: var(--cs-ink); font-variant-numeric: lining-nums; }
+#vrule { width: calc(var(--cs-stroke) * 2); height: 300px; background: var(--cs-accent); border-radius: 999px; transform-origin: 50% 0; will-change: transform; }
+#ntext { max-width: 900px; }
+#ntext .eb { font-family: var(--x-font-hand); font-style: var(--x-hand-style); font-weight: 700; font-size: calc(44px * var(--x-hand-scale)); color: var(--x-ink2); }
+#ntitle { font-size: calc(108px * var(--x-title-scale)); margin-top: 10px; }
+/* stack */
+#stack { display: none; text-align: center; max-width: 1500px; }
+#stage.stack #stack { display: block; }
+#seb { display: inline-flex; }
+#stitle { font-size: calc(150px * var(--x-title-scale)); margin-top: 28px; }
+/* panel */
+#panel { display: none; width: 820px; padding: 56px 64px 64px; }
+#stage.panel #panel { display: block; }
+#pnum { margin-top: 10px; font-family: var(--cs-font-title); font-weight: var(--x-title-weight); font-size: calc(170px * var(--x-title-scale)); line-height: 0.9; color: var(--cs-accent-2); }
+#prule { height: var(--cs-stroke); background: var(--cs-ink); margin: 28px 0 26px; transform-origin: 0 50%; will-change: transform; }
+#ptitle { font-size: calc(92px * var(--x-title-scale)); }
+</style>
+<div id="zone"><div id="cam"><div id="wrap">
+  <div id="num">
+    <div class="ml"><span class="mi" id="big"></span></div>
+    <i id="vrule"></i>
+    <div id="ntext"><div class="ml"><span class="mi eb" id="neb"></span></div><div class="ttl" id="ntitle"></div></div>
+  </div>
+  <div id="stack"><span class="cs-chip dark" id="seb"></span><div class="ttl" id="stitle"></div></div>
+  <div class="cs-sh" id="psh"><div class="cs-card" id="panel">
+    <div class="ml"><span class="mi cs-eyebrow" id="peb"></span></div>
+    <div class="ml"><span class="mi" id="pnum"></span></div>
+    <div id="prule"></div>
+    <div class="ttl" id="ptitle"></div>
+  </div></div>
+</div></div></div>
+<script src="core/gsap.min.js"></script>
+<script src="core/cs.js"></script>
+<script>
+CS.comp('chapter-card', function (v, c, tl) {
+  var variant = CS.pick(v.variant, ['number', 'stack', 'panel']);
+  c.stage.classList.add(variant);
+  var at = CS.t('at', 0.2), num = String(v.number || ''), eb = v.eyebrow || '', title = v.title || '';
+  var mode = CS.lower(v.out), oa = Math.min(c.dur - CS.MASK.out, parseFloat(v.out_at) || c.dur - 0.4), outEl;
+  if (variant === 'number') {
+    document.getElementById('big').textContent = num;
+    document.getElementById('neb').textContent = eb;
+    var r = CS.fitText(document.getElementById('ntitle'), title, [], CS.titleSizes([108, 96, 86, 76]), 2);
+    CS.linesIn(tl, '#big', at);
+    CS.reveal(tl, '#vrule', at + 0.2, { axis: 'y' });
+    CS.linesIn(tl, '#neb', at + 0.35);
+    CS.linesIn(tl, r.inner, at + 0.45);
+    outEl = '#num';
+  } else if (variant === 'stack') {
+    document.getElementById('seb').textContent = (eb + ' ' + num).trim();
+    var r2 = CS.fitText(document.getElementById('stitle'), title, CS.list(v.hot).slice(0, 1), CS.titleSizes([150, 132, 118, 104]), 2);
+    CS.settle(tl, '#seb', at, { scale: true });
+    CS.linesIn(tl, r2.inner, at + 0.2);
+    if (r2.marks[0] && r2.marks[0].length) CS.swipeAll(tl, r2.marks[0], at + 0.85, CS.S.medium);
+    outEl = '#stack';
+  } else {
+    document.getElementById('peb').textContent = eb;
+    document.getElementById('pnum').textContent = num;
+    var r3 = CS.fitText(document.getElementById('ptitle'), title, [], CS.titleSizes([92, 84, 76, 68]), 3);
+    gsap.set('#panel', { y: 30 });
+    tl.to('#panel', { y: 0, duration: CS.S.long, ease: CS.EASE.enter }, at);
+    CS.surfaceIn(tl, '#panel', at);
+    CS.linesIn(tl, ['#peb', '#pnum'], at + 0.2);
+    CS.reveal(tl, '#prule', at + 0.35);
+    CS.linesIn(tl, r3.inner, at + 0.45);
+    outEl = '#panel';
+  }
+  if (variant === 'panel') CS.anchor(document.getElementById('wrap'), 'left');
+  else CS.place(document.getElementById('wrap'), { max: 1 });
+  CS.breath(tl, '#cam', at + 1, c.dur, 0.015);
+  if (mode !== 'cut') CS.surfaceOut(tl, outEl, oa, { dir: 'up' });
+  tl.set({}, {}, c.dur);
+});
+</script>
+</div>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!doctype html>
+<!-- logo-row: the things involved (apps, tools, people), each arriving on the word that names it.
+     Images are optional and always the user's own: without one an item shows its initials or a text chip.
+     row = tiles in a row with the name under each, an optional label above
+     hub = a centre node; on each item's word a line draws out from the centre and the item settles at its end
+     chips = text chips that land one by one under the label (no images at all) -->
+<html>
+<head><meta charset="UTF-8"/>
+<link rel="stylesheet" href="tokens.css"/><link rel="stylesheet" href="core/cs.css"/></head>
+<body style="margin:0;padding:0;background:transparent;">
+<div id="stage" data-composition-id="cs-logo-row" data-width="1080" data-height="1920" data-start="0" data-duration="5" data-track-index="0">
+<style>
+#wrap { position: relative; display: flex; flex-direction: column; align-items: center; }
+#label { font-size: calc(var(--t-head) * var(--x-title-scale) * 0.82); text-align: center; white-space: nowrap; }
+#row { display: flex; gap: 56px; align-items: flex-start; justify-content: center; margin-top: 56px; }
+.item { display: flex; flex-direction: column; align-items: center; gap: 22px; }
+.nm { text-align: center; font-size: 48px; font-weight: var(--x-strong); line-height: 1.08; }
+/* hub */
+#hub { display: none; position: relative; width: 760px; height: 740px; margin-top: 24px; }
+#stage.hub #hub { display: block; }
+#stage.hub #row, #stage.chips #row { display: none; }
+#links { position: absolute; left: 0; top: 0; width: 760px; height: 740px; overflow: visible; }
+#links path { fill: none; stroke: var(--cs-ink); stroke-width: var(--cs-stroke); stroke-linecap: round; will-change: stroke-dashoffset; }
+#core { position: absolute; z-index: 2; font-size: 58px; padding: 0.42em 0.9em; }
+.hubt { position: absolute; z-index: 1; }
+.hubt .cs-chip { font-size: 50px; }
+/* chips */
+#chips { display: none; flex-wrap: wrap; justify-content: center; gap: 22px 22px; width: 860px; margin-top: 48px; }
+#stage.chips #chips { display: flex; }
+#chips .cs-chip { font-size: 60px; padding: 0.36em 0.86em; }
+#chips .cs-chip.accent { box-shadow: none; }
+</style>
+<div id="zone"><div id="cam"><div id="wrap">
+  <div class="ml" id="labelw"><span class="mi cs-title" id="label"></span></div>
+  <div id="row"></div>
+  <div id="hub"><svg id="links" viewBox="0 0 760 740"></svg><span class="cs-chip dark" id="core"></span></div>
+  <div id="chips"></div>
+</div></div></div>
+<script src="core/gsap.min.js"></script>
+<script src="core/cs.js"></script>
+<script>
+CS.comp('logo-row', function (v, c, tl) {
+  var variant = CS.pick(v.variant, ['row', 'hub', 'chips']);
+  c.stage.classList.add(variant);
+  var names = CS.list(v.names).slice(0, 4), images = String(v.images || '').split('|').map(function (s) { return s.trim(); }), n = Math.max(1, names.length);
+  var at = CS.times('at', n, 0.4, 0.8), la = CS.t('label_at', 0.1);
+  document.getElementById('label').textContent = v.label || '';
+  document.getElementById('labelw').style.display = v.label ? '' : 'none';
+  function tileHtml(i, size) {
+    return '<div class="cs-sh tw"><div class="cs-tile" id="tl' + i + '" style="width:' + size + 'px;height:' + size + 'px"></div></div>';
+  }
+  // an item lands: it rises and grows from .84 on the settle curve, no overshoot
+  function land(el, when) { gsap.set(el, { opacity: 0, scale: 0.84, y: 24 }); tl.to(el, { opacity: 1, scale: 1, y: 0, duration: CS.S.medium, ease: CS.EASE.enter }, when); }
+
+  if (variant === 'row') {
+    var row = document.getElementById('row'), size = [300, 250, 210, 176][n - 1];
+    row.style.gap = (n > 3 ? 32 : 56) + 'px';
+    row.innerHTML = names.map(function (nm, i) {
+      return '<div class="item" id="it' + i + '">' + tileHtml(i, size) + '<div class="ml" style="max-width:' + (size + 60) + 'px"><span class="mi nm" id="nm' + i + '">' + CS.esc(nm) + '</span></div></div>';
+    }).join('');
+    names.forEach(function (nm, i) { CS.tile(document.getElementById('tl' + i), images[i], nm, i); });
+    if (v.label) CS.linesIn(tl, '#label', la);
+    names.forEach(function (nm, i) { land(document.querySelector('#it' + i + ' .tw'), at[i]); CS.linesIn(tl, '#nm' + i, at[i] + 0.15); });
+  } else if (variant === 'hub') {
+    var hub = document.getElementById('hub'), svg = document.getElementById('links'), HUB = [380, 370];
+    var POS = { 1: [[380, 100]], 2: [[150, 370], [610, 370]], 3: [[380, 100], [150, 630], [610, 630]], 4: [[150, 110], [610, 110], [150, 630], [610, 630]] }[n];
+    var core = document.getElementById('core'); core.textContent = v.centre || '';
+    core.style.left = (HUB[0] - core.offsetWidth / 2) + 'px'; core.style.top = (HUB[1] - core.offsetHeight / 2) + 'px';
+    hub.querySelectorAll('.hubt').forEach(function (e) { e.remove(); });
+    hub.insertAdjacentHTML('beforeend', names.map(function (nm, i) {
+      return '<div class="hubt" id="ht' + i + '">' + (images[i] ? tileHtml(i, 200) : '<div class="cs-sh tw"><span class="cs-chip line">' + CS.esc(nm) + '</span></div>') + '</div>';
+    }).join(''));
+    svg.innerHTML = names.map(function (nm, i) { return '<path id="ln' + i + '" d="M0 0 L1 1"/>'; }).join('');
+    CS.settle(tl, '#core', CS.t('centre_at', 0.2), { scale: true });
+    var cw = core.offsetWidth / 2 + 20, ch = core.offsetHeight / 2 + 20;
+    names.forEach(function (nm, i) {
+      if (images[i]) CS.tile(document.getElementById('tl' + i), images[i], nm, i);
+      var el = document.getElementById('ht' + i), w = el.offsetWidth, h = el.offsetHeight;
+      var p = [Math.max(w / 2 + 4, Math.min(760 - w / 2 - 4, POS[i][0])), Math.max(h / 2 + 4, Math.min(740 - h / 2 - 4, POS[i][1]))];
+      el.style.left = (p[0] - w / 2) + 'px'; el.style.top = (p[1] - h / 2) + 'px';
+      // the line runs from just outside the node to just short of the item, never under either
+      var dx = p[0] - HUB[0], dy = p[1] - HUB[1], d = Math.sqrt(dx * dx + dy * dy), ux = dx / d, uy = dy / d;
+      var tIn = Math.min(Math.abs(ux) > 1e-3 ? cw / Math.abs(ux) : 1e9, Math.abs(uy) > 1e-3 ? ch / Math.abs(uy) : 1e9);
+      var tOut = d - Math.min(Math.abs(ux) > 1e-3 ? (w / 2 + 20) / Math.abs(ux) : 1e9, Math.abs(uy) > 1e-3 ? (h / 2 + 20) / Math.abs(uy) : 1e9);
+      var ln = document.getElementById('ln' + i);
+      ln.setAttribute('d', 'M' + (HUB[0] + ux * tIn) + ' ' + (HUB[1] + uy * tIn) + ' L' + (HUB[0] + ux * tOut) + ' ' + (HUB[1] + uy * tOut));
+      var L = ln.getTotalLength(); gsap.set(ln, { strokeDasharray: L, strokeDashoffset: L });
+      tl.to(ln, { strokeDashoffset: 0, duration: 0.45, ease: CS.EASE.enter }, Math.max(0, at[i] - 0.25));
+      land(el.querySelector('.tw'), at[i]);
+    });
+    if (v.label) CS.linesIn(tl, '#label', la);
+  } else {
+    var box = document.getElementById('chips');
+    box.innerHTML = names.map(function (nm, i) { return '<span class="cs-chip ' + (i === n - 1 && n > 1 ? 'accent' : 'line') + '" id="ch' + i + '">' + CS.esc(nm) + '</span>'; }).join('');
+    if (v.label) CS.linesIn(tl, '#label', la);
+    names.forEach(function (nm, i) { land(document.getElementById('ch' + i), at[i]); });
+  }
+  CS.place(document.getElementById('wrap'), { max: c.zone === 'full' ? 1.15 : 1 });
+  CS.breath(tl, '#cam', at[n - 1] + 0.6, c.dur);
+  CS.ending(tl, '#wrap');
+});
+</script>
+</div>
+</body>
+</html>

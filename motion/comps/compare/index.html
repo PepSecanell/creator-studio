@@ -1,0 +1,159 @@
+<!doctype html>
+<!-- compare: two things, one decision. Each side arrives on the word that names it, the verdict on the verdict word.
+     strike = "Not A. B.": A arrives, a line strikes it out and it recedes, B lands under it on a dark card with a tick
+     split = two cards side by side and a "vs" chip; win = the winner lifts and its name is marked, the other recedes
+     race = two lanes: a bar fills and a timer counts for each, the faster one gets the chip -->
+<html>
+<head><meta charset="UTF-8"/>
+<link rel="stylesheet" href="tokens.css"/><link rel="stylesheet" href="core/cs.css"/></head>
+<body style="margin:0;padding:0;background:transparent;">
+<div id="stage" data-composition-id="cs-compare" data-width="1080" data-height="1920" data-start="0" data-duration="5" data-track-index="0">
+<style>
+#wrap { position: relative; width: 800px; }
+.nm { font-family: var(--cs-font-title); font-weight: var(--x-title-weight); text-transform: var(--x-title-case); letter-spacing: var(--x-title-track); line-height: 1.04; }
+.sb { font-size: 44px; font-weight: var(--x-body-weight); line-height: 1.2; color: var(--x-ink2); }
+/* split */
+#pair { display: none; position: relative; align-items: stretch; }
+#stage.split #wrap { width: 940px; }
+#stage.split #pair { display: flex; }
+.side { flex: 1 1 0; min-width: 0; will-change: transform, opacity; }
+.side .cs-card { height: 100%; padding: 44px 40px 48px; display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
+.side .cs-tile { width: 112px; height: 112px; margin-bottom: 8px; }
+.side .nm { width: 100%; }
+.side .sb { font-size: 42px; }
+#vs { position: absolute; left: 50%; top: 50%; z-index: 5; justify-content: center; font-size: 48px; }
+/* race */
+#race { display: none; }
+#stage.race #race { display: block; }
+.lane { position: relative; padding: 34px 44px 44px; }
+#race > .cs-sh + .cs-sh { margin-top: 36px; }
+#stage.zone-full #race > .cs-sh + .cs-sh { margin-top: 60px; }
+.lhead { display: flex; align-items: center; gap: 18px; }
+.lhead .cs-tile { width: 88px; height: 88px; }
+.lhead .ln { flex: 1; min-width: 0; font-size: 54px; font-weight: var(--x-strong); white-space: nowrap; }
+.lhead .t { font-family: var(--cs-font-title); font-weight: var(--x-title-weight); font-size: calc(70px * var(--x-title-scale)); line-height: 1; white-space: nowrap; }
+.ltrack { position: relative; height: 56px; border-radius: 999px; background: var(--x-soft); margin-top: 24px; overflow: hidden; }
+.lfill { position: absolute; inset: 0; background: color-mix(in srgb, var(--cs-ink) 70%, var(--cs-ground)); transform-origin: 0 50%; transform: scaleX(0); will-change: transform; }
+.lane.won .lfill { background: var(--cs-accent); }
+.wchip { position: absolute; right: 8px; top: 50%; z-index: 2; font-size: 34px; padding: 0.22em 0.7em; }
+.ltrack { overflow: visible; }
+.ltrack .lfill { border-radius: 999px; }
+/* strike */
+#strike { display: none; }
+#stage.strike #strike { display: block; }
+.srow { display: flex; align-items: center; gap: 24px; padding: 44px 52px; }
+.srow .nm { position: relative; display: inline-block; }
+.srow .sb { margin-top: 8px; }
+#sb { margin-top: 32px; }
+#sbc .sb { color: var(--x-on-dark2); }
+#line { position: absolute; left: -12px; right: -12px; top: 52%; height: calc(var(--cs-stroke) * 2.2); border-radius: 999px; background: var(--cs-accent-2); transform-origin: 0 50%; transform: scaleX(0); will-change: transform; }
+#tick { width: 96px; height: 96px; border-radius: 50%; background: var(--cs-accent); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; margin-left: auto; will-change: transform, opacity; }
+#tick svg { width: 52px; height: 52px; }
+#tick path { fill: none; stroke: var(--cs-on-accent); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+#saw { will-change: opacity, transform; }
+</style>
+<div id="zone"><div id="cam"><div id="wrap">
+  <div id="pair">
+    <div class="side" id="sideA"><div class="cs-sh" style="height:100%"><div class="cs-card" id="cA"></div></div></div>
+    <div class="side" id="sideB"><div class="cs-sh" style="height:100%"><div class="cs-card" id="cB"></div></div></div>
+    <span class="cs-chip dark" id="vs"></span>
+  </div>
+  <div id="race">
+    <div class="cs-sh"><div class="cs-card lane" id="lA"></div></div>
+    <div class="cs-sh"><div class="cs-card lane" id="lB"></div></div>
+  </div>
+  <div id="strike">
+    <div id="saw"><div class="cs-sh"><div class="cs-card srow" id="sa"><div><div class="ml"><span class="mi nm" id="sanm"></span></div><div class="ml"><span class="mi sb" id="sasb"></span></div></div></div></div></div>
+    <div class="cs-sh" id="sb"><div class="cs-dark srow" id="sbc"><div><div class="ml"><span class="mi nm" id="sbnm"></span></div><div class="ml"><span class="mi sb" id="sbsb"></span></div></div>
+      <div id="tick"><svg viewBox="0 0 48 48"><path d="M10 25 L20 35 L38 14"/></svg></div></div></div>
+  </div>
+</div></div></div>
+<script src="core/gsap.min.js"></script>
+<script src="core/cs.js"></script>
+<script>
+CS.comp('compare', function (v, c, tl) {
+  var variant = CS.pick(v.variant, ['strike', 'split', 'race']);
+  c.stage.classList.add(variant);
+  var aa = CS.t('a_at', 0.2), ba = CS.t('b_at', 2.0), last = ba;
+  var nameSizes = CS.titleSizes([84, 76, 68, 60, 54]);
+  if (variant === 'split') {
+    var marks = {};
+    ['A', 'B'].forEach(function (s) {
+      var k = s.toLowerCase(), card = document.getElementById('c' + s);
+      card.innerHTML = (v[k + '_image'] ? '<div class="cs-tile lg" id="tile' + s + '"></div>' : '') +
+        '<div class="nm" id="nm' + s + '"></div>' + (v[k + '_sub'] ? '<div class="ml"><span class="mi sb">' + CS.esc(v[k + '_sub']) + '</span></div>' : '');
+      if (v[k + '_image']) CS.tile(document.getElementById('tile' + s), v[k + '_image'], v[k + '_name'], s === 'A' ? 0 : 1);
+    });
+    var vsEl = document.getElementById('vs');
+    vsEl.textContent = v.vs || 'vs'; vsEl.style.minWidth = vsEl.offsetHeight + 'px';
+    vsEl.style.marginLeft = (-vsEl.offsetWidth / 2) + 'px'; vsEl.style.marginTop = (-vsEl.offsetHeight / 2) + 'px';
+    // the gap grows with the chip, so the chip overlaps each card edge a little and never the text
+    document.getElementById('pair').style.gap = Math.max(72, vsEl.offsetWidth - 40) + 'px';
+    ['A', 'B'].forEach(function (s) {
+      var el = document.getElementById('nm' + s), room = el.clientWidth, name = v[s.toLowerCase() + '_name'] || '';
+      var big = CS.titleSizes([100, 92, 84, 76, 68, 60, 54, 48, 42]);
+      for (var i = 0; i < big.length; i++) { el.style.fontSize = big[i] + 'px'; marks[s] = CS.rich(el, name, [name]); if (Math.max.apply(null, marks[s].inner.map(function (m) { return m.offsetWidth; })) <= room && marks[s].inner.length <= 2) break; }
+    });
+    [['A', aa], ['B', ba]].forEach(function (p) {
+      CS.surfaceIn(tl, '#c' + p[0], p[1], { dir: 'down' });
+      if (document.getElementById('tile' + p[0])) CS.settle(tl, '#tile' + p[0], p[1] + 0.15, { scale: true });
+      CS.linesIn(tl, '#c' + p[0] + ' .mi', p[1] + 0.25);
+    });
+    CS.settle(tl, '#vs', ba + 0.3, { scale: true });
+    var w = CS.lower(v.win);
+    if (w === 'a' || w === 'b') {
+      var wa = Math.max(ba + 0.6, CS.t('win_at', 2.8)), W = w.toUpperCase(), L = w === 'a' ? 'B' : 'A';
+      tl.to('#side' + W, { scale: 1.03, transformOrigin: '50% 100%', duration: CS.S.medium, ease: CS.EASE.enter }, wa);
+      tl.to('#side' + L, { opacity: 0.5, scale: 0.96, duration: CS.S.medium, ease: CS.EASE.settle }, wa);
+      CS.swipeAll(tl, marks[W].marks[0], wa + 0.15, CS.S.medium);
+      last = wa;
+    }
+  } else if (variant === 'race') {
+    var va = parseFloat(v.a_value) || 1, vb = parseFloat(v.b_value) || 1, dec = parseInt(v.decimals, 10) || 0, unit = v.unit || '';
+    var ra = CS.t('race_at', 1.0), rd = Math.max(0.6, Math.min(parseFloat(v.race_dur) || 2.6, c.dur - ra - 0.5)), mx = Math.max(va, vb), winner = va <= vb ? 'A' : 'B';
+    [['A', 'a'], ['B', 'b']].forEach(function (p) {
+      var lane = document.getElementById('l' + p[0]);
+      lane.classList.toggle('won', p[0] === winner);
+      lane.innerHTML = '<div class="lhead">' + (v[p[1] + '_image'] ? '<div class="cs-tile lg" id="tile' + p[0] + '"></div>' : '') +
+        '<div class="ln"><div class="ml"><span class="mi">' + CS.esc(v[p[1] + '_name'] || '') + '</span></div></div>' +
+        '<div class="t cs-num" id="t' + p[0] + '"></div></div><div class="ltrack"><i class="lfill" id="f' + p[0] + '"></i></div>';
+      if (v[p[1] + '_image']) CS.tile(document.getElementById('tile' + p[0]), v[p[1] + '_image'], v[p[1] + '_name'], p[0] === 'A' ? 0 : 1);
+    });
+    [['A', aa, va], ['B', ba, vb]].forEach(function (p) {
+      var el = document.getElementById('t' + p[0]), d = rd * p[2] / mx;
+      CS.surfaceIn(tl, '#l' + p[0], p[1]);
+      if (document.getElementById('tile' + p[0])) CS.settle(tl, '#tile' + p[0], p[1] + 0.15, { scale: true });
+      CS.linesIn(tl, '#l' + p[0] + ' .mi', p[1] + 0.2);
+      tl.to('#f' + p[0], { scaleX: 1, duration: d, ease: CS.EASE.linear }, Math.max(ra, p[1] + 0.3));
+      CS.count(tl, el, { from: 0, to: p[2], at: Math.max(ra, p[1] + 0.3), dur: d, dec: dec, suf: unit, ease: CS.EASE.linear });
+      if (p[0] === winner && v.win_label) {
+        document.querySelector('#l' + p[0] + ' .ltrack').insertAdjacentHTML('beforeend', '<span class="cs-chip dark wchip" id="wchip">' + CS.esc(v.win_label) + '</span>');
+        gsap.set('#wchip', { yPercent: -50 });
+        CS.settle(tl, '#wchip', Math.max(ra, p[1] + 0.3) + d + 0.05, { scale: true });
+      }
+    });
+    last = ra + rd;
+  } else {
+    var nm = document.getElementById('sanm');
+    nm.innerHTML = CS.esc(v.a_name || '') + '<i id="line"></i>';
+    document.getElementById('sasb').textContent = v.a_sub || ''; document.getElementById('sasb').parentNode.style.display = v.a_sub ? '' : 'none';
+    document.getElementById('sbnm').textContent = v.b_name || '';
+    document.getElementById('sbsb').textContent = v.b_sub || ''; document.getElementById('sbsb').parentNode.style.display = v.b_sub ? '' : 'none';
+    [nm, document.getElementById('sbnm')].forEach(function (e) { CS.fitWidth(e, 600, nameSizes); });
+    var sa = Math.max(aa + 0.6, CS.t('strike_at', 1.2));
+    CS.surfaceIn(tl, '#sa', aa);
+    CS.linesIn(tl, ['#sanm', '#sasb'], aa + 0.2);
+    CS.reveal(tl, '#line', sa);
+    tl.to('#saw', { opacity: 0.5, scale: 0.97, duration: CS.S.medium, ease: CS.EASE.settle }, sa + 0.3);
+    CS.surfaceIn(tl, '#sbc', ba);
+    CS.linesIn(tl, ['#sbnm', '#sbsb'], ba + 0.2);
+    CS.settle(tl, '#tick', ba + 0.45, { scale: true });
+  }
+  CS.place(document.getElementById('wrap'), { max: 1.12 });
+  CS.breath(tl, '#cam', last + 0.6, c.dur, 0.015);
+  CS.ending(tl, '#wrap');
+});
+</script>
+</div>
+</body>
+</html>

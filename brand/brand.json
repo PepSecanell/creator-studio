@@ -1,0 +1,61 @@
+{
+  "schema": "creator-brand/v1",
+  "name": "Northwind",
+  "tagline": "Small builds, explained in a minute",
+  "language": "en",
+  "style": "notebook",
+  "palette": {
+    "ground": "#F7F5EF",
+    "ink": "#1F2433",
+    "accent": "#FFD84D",
+    "accent_2": "#2F6BFF",
+    "muted": "#8A8F9C",
+    "on_accent": "#1F2433"
+  },
+  "fonts": {
+    "title": null,
+    "caption": null,
+    "body": null
+  },
+  "logo": "logo.png",
+  "voice": {
+    "who": "A designer who builds tiny tools at night",
+    "audience": "People who want to make their first app",
+    "topics": [
+      "no-code",
+      "AI tools",
+      "side projects"
+    ],
+    "tone": [
+      "plain words",
+      "warm",
+      "a bit dry"
+    ],
+    "banned": [
+      "game changer",
+      "unlock",
+      "dive in"
+    ],
+    "cta": "Follow for one small build a day",
+    "link": "example.com"
+  },
+  "handles": {
+    "youtube": "@northwind",
+    "tiktok": "@northwind",
+    "instagram": "@northwind",
+    "x": "@northwind",
+    "linkedin": ""
+  },
+  "schedule": {
+    "shorts_per_day": 2,
+    "long_per_week": 1,
+    "timezone": "UTC"
+  },
+  "editing": {
+    "keep_pauses": false,
+    "music": true,
+    "sfx": true,
+    "caption_case": "sentence",
+    "max_short_seconds": 45
+  }
+}

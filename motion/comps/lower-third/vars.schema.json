@@ -1,0 +1,16 @@
+{
+  "name": "lower-third",
+  "label": "Who is talking: a name and one line, low in the frame, on its own plate so it reads over any footage",
+  "kind": "long",
+  "zones": ["full", "split"],
+  "duration": 5,
+  "vars": {
+    "variant": { "type": "enum", "values": ["plate", "dark", "tag"], "default": "plate", "label": "plate = a paper plate with an accent edge, dark = an ink plate, tag = a name chip with the line written under it" },
+    "name": { "type": "string", "default": "Sam Rivera", "label": "The name" },
+    "role": { "type": "string", "default": "Builds small apps at night", "label": "One line, at most 6 words" },
+    "side": { "type": "enum", "values": ["left", "right"], "default": "left", "label": "Which side of the frame" },
+    "at": { "type": "time", "default": 0.3, "label": "When it arrives" },
+    "out": { "type": "enum", "values": ["edge", "cut"], "default": "edge", "label": "edge = leave by its edge at out_at, cut = hold to the end" },
+    "out_at": { "type": "time", "default": "", "label": "edge: when it leaves (blank = 0.4 s before the end)" }
+  }
+}

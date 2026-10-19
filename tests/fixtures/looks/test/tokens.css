@@ -1,0 +1,12 @@
+:root {
+  --cs-ground: #000000;
+  --cs-ink: #000000;
+  --cs-accent: #000000;
+  --cs-accent-2: #000000;
+  --cs-muted: #000000;
+  --cs-on-accent: #000000;
+  --cs-font-title: serif;
+  --cs-font-body: sans-serif;
+  --cs-radius: 20px;
+  --cs-stroke: 6px;
+}

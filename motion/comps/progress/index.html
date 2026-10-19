@@ -1,0 +1,123 @@
+<!doctype html>
+<!-- progress: "where we are". The video's steps with the current one lit, so a viewer always knows the way.
+     Use a different variant from video to video (and at different moments) so it never feels like a template.
+     rail = a plate of steps across the top; the accent block travels from the last step to this one
+     corner = a small counter in the top corner: the number rolls over, the step name swaps by its mask, dots fill
+     list = a stacked list at the side; the bar slides down to the current row, the rows before it get ticks -->
+<html>
+<head><meta charset="UTF-8"/>
+<link rel="stylesheet" href="tokens.css"/><link rel="stylesheet" href="core/cs.css"/></head>
+<body style="margin:0;padding:0;background:transparent;">
+<div id="stage" data-composition-id="cs-progress" data-width="1920" data-height="1080" data-start="0" data-duration="4" data-track-index="0">
+<style>
+#wrap { position: relative; display: inline-block; }
+/* rail */
+#rail { display: none; position: relative; padding: 14px; border-radius: 999px; }
+#stage.rail #rail { display: flex; }
+#rail .st { position: relative; z-index: 1; padding: 16px 34px; font-size: 40px; font-weight: var(--x-strong); white-space: nowrap; color: var(--x-ink2); display: flex; align-items: center; gap: 12px; }
+#rail .st.done { color: var(--cs-ink); }
+#rail .st .n { font-family: var(--cs-font-title); font-weight: var(--x-title-weight); font-size: calc(34px * var(--x-title-scale)); opacity: .7; }
+#rail .sep { align-self: center; width: 28px; height: 3px; background: var(--x-line); z-index: 1; }
+#blk { position: absolute; z-index: 0; left: 0; top: 14px; bottom: 14px; border-radius: 999px; background: var(--cs-accent); will-change: transform, width; }
+#rail .st.now { color: var(--cs-on-accent); }
+/* corner */
+#corner { display: none; align-items: center; gap: 26px; padding: 22px 34px 22px 26px; }
+#stage.corner #corner { display: flex; }
+#cnum { position: relative; height: calc(96px * var(--x-title-scale)); overflow: hidden; min-width: 1.2em; font-family: var(--cs-font-title); font-weight: var(--x-title-weight); font-size: calc(96px * var(--x-title-scale)); line-height: 1; text-align: center; }
+#cnum span { position: absolute; left: 0; right: 0; top: 0; will-change: transform; }
+#cof { font-size: 32px; font-weight: var(--x-strong); color: var(--x-ink2); white-space: nowrap; }
+#cname { position: relative; height: 60px; overflow: hidden; min-width: 300px; }
+#cname span { position: absolute; left: 0; top: 0; font-size: 48px; font-weight: var(--x-strong); line-height: 60px; white-space: nowrap; will-change: transform; }
+#dots { display: flex; gap: 10px; margin-top: 10px; }
+#dots i { width: 40px; height: 10px; border-radius: 999px; background: var(--x-soft); position: relative; overflow: hidden; }
+#dots i b { position: absolute; inset: 0; background: var(--cs-ink); transform-origin: 0 50%; will-change: transform; }
+#dots i.now b { background: var(--cs-accent-2); }
+/* list */
+#list { display: none; position: relative; padding: 22px; min-width: 560px; }
+#stage.list #list { display: block; }
+#list .row { position: relative; z-index: 1; display: flex; align-items: center; gap: 22px; padding: 16px 22px; font-size: 44px; font-weight: var(--x-strong); color: var(--x-ink2); white-space: nowrap; }
+#list .row.done, #list .row.now { color: var(--cs-ink); }
+#list .row .n { font-family: var(--cs-font-title); font-weight: var(--x-title-weight); font-size: calc(40px * var(--x-title-scale)); width: 1.3em; }
+#list .row .tk { flex: 0 0 auto; margin-left: auto; width: 44px; height: 44px; border-radius: 50%; background: var(--cs-ink); display: flex; align-items: center; justify-content: center; will-change: transform, opacity; }
+#list .row .tk path { fill: none; stroke: var(--cs-ground); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+#bar { position: absolute; z-index: 0; left: 22px; right: 22px; top: 0; border-radius: calc(var(--cs-radius) * 0.8); background: var(--cs-accent); will-change: transform; }
+#list .row.now { color: var(--cs-on-accent); }
+</style>
+<div id="zone"><div id="cam"><div id="wrap">
+  <div class="cs-sh"><div class="cs-card" id="rail"><i id="blk"></i></div></div>
+  <div class="cs-sh"><div class="cs-card" id="corner">
+    <div><div id="cnum"></div><div id="cof"></div></div>
+    <div><div id="cname"></div><div id="dots"></div></div>
+  </div></div>
+  <div class="cs-sh"><div class="cs-card" id="list"><i id="bar"></i></div></div>
+</div></div></div>
+<script src="core/gsap.min.js"></script>
+<script src="core/cs.js"></script>
+<script>
+CS.comp('progress', function (v, c, tl) {
+  var variant = CS.pick(v.variant, ['rail', 'corner', 'list']);
+  c.stage.classList.add(variant);
+  var steps = CS.list(v.steps).slice(0, 6), n = Math.max(1, steps.length);
+  var cur = Math.max(1, Math.min(n, parseInt(v.current, 10) || 1)) - 1, prev = Math.max(0, cur - 1);
+  var at = CS.t('at', 0.2), ma = Math.max(at + 0.5, CS.t('move_at', 0.9)), mode = CS.lower(v.out);
+  var oa = Math.min(c.dur - CS.MASK.out, parseFloat(v.out_at) || c.dur - 0.4), box;
+  var TICK = '<svg viewBox="0 0 40 40" width="26" height="26"><path d="M9 21 L17 29 L31 12"/></svg>';
+  if (variant === 'rail') {
+    box = document.getElementById('rail');
+    box.querySelectorAll('.st,.sep').forEach(function (e) { e.remove(); });
+    box.insertAdjacentHTML('beforeend', steps.map(function (s, i) {
+      return (i ? '<i class="sep"></i>' : '') + '<span class="st' + (i < cur ? ' done' : '') + '" id="s' + i + '"><span class="n">' + (i + 1) + '</span>' + CS.esc(s) + '</span>';
+    }).join(''));
+    var a = document.getElementById('s' + prev), b = document.getElementById('s' + cur), blk = document.getElementById('blk');
+    gsap.set(blk, { x: a.offsetLeft, width: a.offsetWidth });
+    CS.anchor(document.getElementById('wrap'), 'top');
+    CS.surfaceIn(tl, box, at);
+    CS.settle(tl, box.querySelectorAll('.st'), at + 0.2);
+    // the block travels to this step, and its label turns to the on-accent colour as it lands
+    tl.to(blk, { x: b.offsetLeft, width: b.offsetWidth, duration: CS.S.travel * 0.8, ease: CS.EASE.travel }, ma);
+    b.classList.remove('now'); var bc = getComputedStyle(b).color; b.classList.add('now'); var nc = getComputedStyle(b).color;
+    gsap.set(b, { color: bc }); tl.to(b, { color: nc, duration: CS.S.short, ease: CS.EASE.settle }, ma + 0.6);
+  } else if (variant === 'corner') {
+    box = document.getElementById('corner');
+    document.getElementById('cnum').innerHTML = '<span id="na">' + (prev + 1) + '</span><span id="nb">' + (cur + 1) + '</span>';
+    document.getElementById('cof').textContent = 'of ' + n;
+    document.getElementById('cname').innerHTML = '<span id="ca">' + CS.esc(steps[prev] || '') + '</span><span id="cb">' + CS.esc(steps[cur] || '') + '</span>';
+    var nm = document.getElementById('cname'); nm.style.minWidth = Math.max(document.getElementById('ca').offsetWidth, document.getElementById('cb').offsetWidth) + 'px';
+    document.getElementById('dots').innerHTML = steps.map(function (s, i) { return '<i' + (i === cur ? ' class="now"' : '') + '><b id="d' + i + '"></b></i>'; }).join('');
+    steps.forEach(function (s, i) { gsap.set('#d' + i, { scaleX: i < cur ? 1 : 0 }); });
+    var same = cur === prev;
+    gsap.set('#nb', { yPercent: same ? 0 : 110 }); gsap.set('#cb', { yPercent: same ? 0 : 110 });
+    if (same) gsap.set(['#na', '#ca'], { opacity: 0 });
+    CS.anchor(document.getElementById('wrap'), 'top-right');
+    CS.surfaceIn(tl, box, at, { dir: 'left' });
+    if (!same) {
+      // the number rolls over and the name swaps by its mask: the old one leaves upward, the new one rises
+      tl.to(['#na', '#ca'], { yPercent: -110, duration: CS.MASK.line, ease: CS.EASE.travel }, ma);
+      tl.to(['#nb', '#cb'], { yPercent: 0, duration: CS.MASK.line, ease: CS.EASE.travel }, ma + 0.06);
+    }
+    tl.to('#d' + cur, { scaleX: 1, duration: CS.S.medium, ease: CS.EASE.enter }, ma + 0.2);
+  } else {
+    box = document.getElementById('list');
+    box.querySelectorAll('.row').forEach(function (e) { e.remove(); });
+    box.insertAdjacentHTML('beforeend', steps.map(function (s, i) {
+      return '<div class="row' + (i < cur ? ' done' : '') + '" id="r' + i + '"><span class="n">' + (i + 1) + '</span>' + CS.esc(s) + (i < cur ? '<span class="tk" id="t' + i + '">' + TICK + '</span>' : '') + '</div>';
+    }).join(''));
+    var ra = document.getElementById('r' + prev), rb = document.getElementById('r' + cur), bar = document.getElementById('bar');
+    bar.style.height = rb.offsetHeight + 'px';
+    gsap.set(bar, { y: ra.offsetTop });
+    CS.anchor(document.getElementById('wrap'), 'left');
+    CS.surfaceIn(tl, box, at, { dir: 'down' });
+    CS.settle(tl, box.querySelectorAll('.row'), at + 0.2);
+    tl.to(bar, { y: rb.offsetTop, duration: CS.S.travel * 0.7, ease: CS.EASE.travel }, ma);
+    if (prev !== cur) CS.settle(tl, '#t' + prev, ma + 0.1, { scale: true });
+    rb.classList.remove('now'); var c0 = getComputedStyle(rb).color; rb.classList.add('now'); var c1 = getComputedStyle(rb).color;
+    gsap.set(rb, { color: c0 }); tl.to(rb, { color: c1, duration: CS.S.short, ease: CS.EASE.settle }, ma + 0.5);
+  }
+  CS.drift(tl, '#cam', ma + 1, c.dur - 0.5, { y: -3 });
+  if (mode !== 'cut') CS.surfaceOut(tl, box, oa, { dir: 'up' });
+  tl.set({}, {}, c.dur);
+});
+</script>
+</div>
+</body>
+</html>

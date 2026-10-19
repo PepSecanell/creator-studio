@@ -1,0 +1,166 @@
+<!doctype html>
+<!-- app-screen: an app screen rebuilt clean (our type and palette, the app's own icon if given). ONE thing
+     happens on the word: a badge lands on the hot row, a toggle switches on, or the row is marked. Optionally a
+     cursor taps it and a small menu rises. Say "rebuilt" in the plan: this is not a capture.
+     phone = a phone rising out of the bottom of the zone (its foot runs off the zone), rows on the screen
+     sheet = a floating settings panel: header (icon, app, title), 2 to 4 rows
+     browser = a browser window: the address pill, icon and page title, 1 to 3 rows -->
+<html>
+<head><meta charset="UTF-8"/>
+<link rel="stylesheet" href="tokens.css"/><link rel="stylesheet" href="core/cs.css"/></head>
+<body style="margin:0;padding:0;background:transparent;">
+<div id="stage" data-composition-id="cs-app-screen" data-width="1080" data-height="1920" data-start="0" data-duration="5" data-track-index="0">
+<style>
+#wrap { position: relative; width: 800px; }
+/* phone */
+#clip { display: none; position: relative; width: 640px; margin: 0 auto; overflow: hidden; padding: 0 20px; }
+#stage.phone #clip { display: block; }
+#stage.phone #panel { display: none; }
+#device { position: relative; width: 600px; height: 1200px; border-radius: 88px; padding: 16px; background: var(--x-dark); will-change: transform; }
+#screen { position: relative; width: 568px; height: 1168px; border-radius: 72px; overflow: hidden; background: var(--x-surface); padding: 84px 36px 0; }
+#island { position: absolute; left: 214px; top: 22px; width: 140px; height: 40px; border-radius: 999px; background: var(--x-dark); }
+.apphead { display: flex; align-items: center; gap: 18px; }
+.apphead .cs-tile { width: 84px; height: 84px; }
+.appn { white-space: nowrap; font-size: 54px; font-weight: var(--x-strong); }
+#list { margin-top: 28px; }
+#list .row .lb { font-size: 46px; white-space: nowrap; }
+#list .row .txt { overflow: hidden; }
+/* panel */
+#card { padding: 32px 0 12px; }
+#bar { display: none; align-items: center; gap: 16px; padding: 0 32px 32px; border-bottom: 2px solid var(--x-line); margin-top: -10px; }
+#stage.browser #bar { display: flex; }
+.dot { width: 24px; height: 24px; border-radius: 50%; flex: 0 0 auto; }
+#d1 { background: var(--cs-accent-2); } #d2 { background: var(--cs-accent); } #d3 { background: var(--cs-muted); }
+#url { flex: 1; margin-left: 16px; background: var(--x-soft); border-radius: 999px; padding: 12px 32px; white-space: nowrap; font-size: 38px; }
+.phead { display: flex; align-items: center; gap: 24px; padding: 0 48px; }
+#stage.browser .phead { padding-top: 40px; }
+.phead .cs-tile { width: 100px; height: 100px; }
+#ptitle { font-family: var(--cs-font-title); font-weight: var(--x-title-weight); text-transform: var(--x-title-case); font-size: calc(70px * var(--x-title-scale)); line-height: 1.06; letter-spacing: var(--x-title-track); }
+#prow { margin-top: 18px; }
+/* rows */
+.row { position: relative; display: flex; align-items: center; gap: 24px; padding: 16px 48px; min-height: 124px; }
+#list .row { padding: 16px 0; min-height: 120px; }
+.row + .row { border-top: 2px solid var(--x-line); }
+.row .txt { flex: 1; min-width: 0; position: relative; z-index: 1; }
+.row .lb { font-weight: var(--x-strong); font-size: 52px; line-height: 1.12; }
+.row .sb { margin-top: 4px; }
+.row .val { font-weight: var(--x-strong); font-size: 46px; white-space: nowrap; position: relative; z-index: 1; }
+.row .bg { position: absolute; left: 14px; right: 14px; top: 8px; bottom: 8px; border-radius: var(--cs-radius); background: color-mix(in srgb, var(--cs-accent) 34%, var(--x-surface)); clip-path: inset(0% 100% 0% 0%); will-change: clip-path; z-index: 0; }
+#list .row .bg { left: -14px; right: -14px; }
+.tg { position: relative; width: 132px; height: 76px; border-radius: 999px; background: color-mix(in srgb, var(--cs-muted) 40%, var(--x-surface)); flex: 0 0 auto; z-index: 1; }
+.tg .on { position: absolute; inset: 0; border-radius: 999px; background: var(--cs-accent-2); clip-path: inset(0% 100% 0% 0%); will-change: clip-path; }
+.tg .kn { position: absolute; left: 6px; top: 6px; width: 64px; height: 64px; border-radius: 50%; background: var(--x-surface); box-shadow: 0 3px 6px color-mix(in srgb, var(--cs-ink) 30%, transparent); will-change: transform; }
+.tg.is-on .on { clip-path: inset(0% 0% 0% 0%); }
+.tg.is-on .kn { transform: translateX(56px); }
+/* badge, cursor, pop */
+#badge { font-size: 42px; }
+#badge svg { width: 32px; height: 32px; flex: 0 0 auto; }
+#badge path { fill: currentColor; }
+#cursor { position: absolute; left: 0; top: 0; width: 64px; height: 80px; z-index: 60; will-change: transform, opacity; filter: drop-shadow(var(--x-shadow)); }
+#cursor path { fill: var(--cs-ink); stroke: var(--x-surface); stroke-width: 4; stroke-linejoin: round; }
+#pop { position: absolute; left: 0; right: 0; bottom: 0; z-index: 50; padding: 24px 24px 32px; border-radius: calc(var(--cs-radius) * 1.5) calc(var(--cs-radius) * 1.5) 0 0;
+  background: var(--x-surface); border-top: 2px solid var(--x-edge); box-shadow: 0 -12px 30px color-mix(in srgb, var(--cs-ink) 12%, transparent); will-change: clip-path; }
+#pop .grab { width: 84px; height: 8px; border-radius: 999px; background: var(--x-line); margin: 0 auto 16px; }
+#pop .pt { font-weight: var(--x-strong); font-size: 48px; white-space: nowrap; }
+#pop .pl { margin-top: 8px; font-size: 42px; color: var(--x-ink2); }
+</style>
+<div id="zone"><div id="cam"><div id="wrap">
+  <div id="clip"><div class="cs-sh" id="phonesh"><div id="device"><div id="screen">
+    <div id="island"></div>
+    <div class="apphead"><div class="cs-tile ic"></div><div class="ml"><span class="mi appn" id="appn"></span></div></div>
+    <div id="list"></div>
+  </div></div></div></div>
+  <div id="panel"><div class="cs-sh"><div class="cs-card" id="card">
+    <div id="bar"><i class="dot" id="d1"></i><i class="dot" id="d2"></i><i class="dot" id="d3"></i><span id="url" class="cs-meta"></span></div>
+    <div class="phead"><div class="cs-tile ic" id="ptile"></div><div><div class="ml"><span class="mi cs-eyebrow" id="appn2"></span></div><div class="ml"><span class="mi" id="ptitle"></span></div></div></div>
+    <div id="prow"></div>
+  </div></div></div>
+  <svg id="cursor" viewBox="0 0 64 80"><path d="M6 4 L6 62 L20 49 L30 72 L40 67 L30 45 L50 45 Z"/></svg>
+</div></div></div>
+<script src="core/gsap.min.js"></script>
+<script src="core/cs.js"></script>
+<script>
+CS.comp('app-screen', function (v, c, tl) {
+  var variant = CS.pick(v.variant, ['phone', 'sheet', 'browser']);
+  c.stage.classList.add(variant);
+  var rows = CS.fields(v.rows).slice(0, variant === 'browser' ? 3 : 4), action = CS.pick(v.action, ['toggle', 'badge', 'highlight', 'none']);
+  var hot = Math.max(1, Math.min(rows.length, parseInt(v.hot_row, 10) || 1)) - 1, pop = CS.list(v.pop);
+  var SPARK = '<svg viewBox="0 0 34 34"><path d="M17 2 L20.5 13.5 L32 17 L20.5 20.5 L17 32 L13.5 20.5 L2 17 L13.5 13.5 Z"/></svg>';
+  function rowHTML(r, i) {
+    var ctl = (r[2] || '').toLowerCase(), ctrl = '';
+    if (ctl === 'toggle' || ctl === 'on') ctrl = '<div class="tg' + (ctl === 'on' ? ' is-on' : '') + '" id="tg' + i + '"><i class="on"></i><i class="kn"></i></div>';
+    else if (r[2]) ctrl = '<div class="val">' + CS.esc(r[2]) + '</div>';
+    return '<div class="row" id="r' + i + '"><i class="bg" id="rb' + i + '"></i><div class="txt"><div class="ml"><span class="mi lb">' + CS.esc(r[0] || '') + '</span></div>' +
+      (r[1] ? '<div class="ml sb"><span class="mi cs-meta">' + CS.esc(r[1]) + '</span></div>' : '') + '</div>' + ctrl + '<div id="bs' + i + '"></div></div>';
+  }
+  document.querySelectorAll('.ic').forEach(function (e) { CS.tile(e, v.image, v.app); });
+  document.getElementById('appn').textContent = v.app || '';
+  document.getElementById('appn2').textContent = v.title ? (v.app || '') : '';
+  document.getElementById('appn2').parentNode.style.display = v.title ? '' : 'none';
+  document.getElementById('ptitle').textContent = v.title || v.app || '';
+  document.getElementById('url').textContent = v.url || '';
+  var s0 = CS.t('screen_at', 0.1), a0 = CS.t('action_at', 1.4);
+  var tapAt = isNaN(parseFloat(v.tap_at)) ? null : CS.t('tap_at', 2.6);
+  var badgeHTML = '<span class="cs-chip accent" id="badge">' + SPARK + CS.esc(v.badge || '') + '</span>';
+  var host = document.getElementById(variant === 'phone' ? 'list' : 'prow');
+  host.innerHTML = rows.map(rowHTML).join('');
+  var target = document.getElementById('r' + hot);
+  if (action === 'badge') { document.getElementById('bs' + hot).innerHTML = badgeHTML; target = document.getElementById('badge'); }
+  if (variant === 'phone') {
+    document.getElementById('clip').style.height = (c.zone === 'full' ? 880 : 620) + 'px';
+    CS.fitWidth(document.getElementById('appn'), 380, [54, 50, 46, 42]);
+    // the phone rises out of the bottom of the zone
+    gsap.set('#device', { y: 300 });
+    tl.to('#device', { y: 0, duration: 0.88, ease: CS.EASE.enter }, s0);
+    gsap.set('#phonesh', { opacity: 0 }); tl.to('#phonesh', { opacity: 1, duration: CS.S.short, ease: CS.EASE.settle }, s0);
+    CS.settle(tl, '#screen .ic', s0 + 0.3, { scale: true });
+    CS.linesIn(tl, '#appn', s0 + 0.35);
+    CS.linesIn(tl, '#list .mi', s0 + 0.45);
+  } else {
+    CS.surfaceIn(tl, '#card', s0, { dir: 'down' });
+    CS.settle(tl, '#ptile', s0 + 0.2, { scale: true });
+    CS.linesIn(tl, ['#appn2', '#ptitle'], s0 + 0.25);
+    if (variant === 'browser') CS.linesIn(tl, '#url', s0 + 0.2);
+    CS.linesIn(tl, '#prow .mi', s0 + 0.4);
+  }
+  // the action, on the word
+  if (action === 'badge' && target) CS.settle(tl, target, a0, { scale: true });
+  if (action === 'toggle') {
+    var tg = document.getElementById('tg' + hot);
+    if (tg) { tg.classList.remove('is-on'); tl.to(tg.querySelector('.kn'), { x: 56, duration: CS.S.short, ease: CS.EASE.settle }, a0); tl.to(tg.querySelector('.on'), { clipPath: CS.CLIP.full, duration: CS.S.short, ease: CS.EASE.settle }, a0); }
+  }
+  if (action === 'highlight') CS.swipe(tl, document.getElementById('rb' + hot), a0, CS.S.medium);
+  var cur = document.getElementById('cursor'), wrapEl = document.getElementById('wrap');
+  gsap.set(cur, { opacity: 0 });
+  CS.place(wrapEl, { max: variant === 'phone' ? 1 : 1.12 });
+  // the tap: a cursor glides in, presses, the menu rises from the bottom of the screen
+  if (tapAt !== null && target) {
+    var ox = 0, oy = 0, e = target;
+    while (e && e !== wrapEl) { ox += e.offsetLeft; oy += e.offsetTop; e = e.offsetParent; }
+    var tx = ox + Math.min(target.offsetWidth * 0.55, 220), ty = oy + target.offsetHeight * 0.55;
+    gsap.set(cur, { x: Math.min(tx + 180, wrapEl.offsetWidth - 72), y: Math.max(ty + 40, Math.min(ty + 150, wrapEl.offsetHeight - 96)) });
+    tl.to(cur, { opacity: 1, duration: CS.S.micro, ease: CS.EASE.settle }, tapAt - 0.7);
+    tl.to(cur, { x: tx, y: ty, duration: CS.S.medium, ease: CS.EASE.travel }, tapAt - 0.6);
+    tl.to(cur, { scale: 0.86, duration: 0.1, ease: CS.EASE.exit }, tapAt);
+    tl.to(target, { scale: 0.96, duration: 0.1, ease: CS.EASE.exit }, tapAt);
+    tl.to(target, { scale: 1, duration: CS.S.micro, ease: CS.EASE.settle }, tapAt + 0.1);
+    if (pop.length) {
+      var box = variant === 'phone' ? document.getElementById('screen') : document.getElementById('card');
+      box.insertAdjacentHTML('beforeend', '<div id="pop"><div class="grab"></div><div class="ml"><span class="mi pt">' + CS.esc(pop[0]) + '</span></div>' +
+        (pop[1] ? '<div class="ml"><span class="mi pl">' + CS.esc(pop[1]) + '</span></div>' : '') + '</div>');
+      var popEl = document.getElementById('pop');
+      // inside a phone the menu sits at the bottom of the visible part of the screen
+      if (variant === 'phone') { popEl.style.bottom = 'auto'; popEl.style.top = (parseFloat(document.getElementById('clip').style.height) - 16 - popEl.offsetHeight) + 'px'; }
+      CS.surfaceIn(tl, popEl, tapAt + 0.18, { dir: 'up', plate: true });
+      CS.linesIn(tl, popEl.querySelectorAll('.mi'), tapAt + 0.3);
+    }
+    // the cursor leaves right after the press, so it never sits on the text that just opened
+    tl.to(cur, { opacity: 0, scale: 0.4, x: '+=46', y: '+=30', duration: CS.S.micro, ease: CS.EASE.exit }, tapAt + 0.2);
+  }
+  CS.breath(tl, '#cam', Math.max(a0, tapAt || 0) + 0.6, c.dur);
+  CS.ending(tl, '#wrap');
+});
+</script>
+</div>
+</body>
+</html>

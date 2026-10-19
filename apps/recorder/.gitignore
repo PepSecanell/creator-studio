@@ -1,0 +1,4 @@
+build/
+*.xcodeproj
+Sources/Info.plist
+Sources/StudioRecorder.entitlements

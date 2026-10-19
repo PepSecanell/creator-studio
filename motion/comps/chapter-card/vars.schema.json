@@ -1,0 +1,17 @@
+{
+  "name": "chapter-card",
+  "label": "A chapter opens: its number and its title, big, for 2 to 3 seconds",
+  "kind": "long",
+  "zones": ["full", "split"],
+  "duration": 3,
+  "vars": {
+    "variant": { "type": "enum", "values": ["number", "stack", "panel"], "default": "number", "label": "number = a huge numeral beside the title, stack = eyebrow over a big title with the key word marked, panel = a card that slides in from the side" },
+    "number": { "type": "string", "default": "2", "label": "The chapter number (or a short mark like 2/5)" },
+    "eyebrow": { "type": "string", "default": "Part", "label": "The small word before the number" },
+    "title": { "type": "string", "default": "Make it ugly first", "label": "The chapter title, at most 6 words" },
+    "hot": { "type": "string", "default": "ugly", "label": "stack: the word to mark (blank = none)" },
+    "at": { "type": "time", "default": 0.2, "label": "When it arrives" },
+    "out": { "type": "enum", "values": ["edge", "cut"], "default": "edge", "label": "edge = leave by its edge at out_at, cut = hold to the end" },
+    "out_at": { "type": "time", "default": "", "label": "edge: when it leaves (blank = 0.4 s before the end)" }
+  }
+}

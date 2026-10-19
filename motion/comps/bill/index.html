@@ -1,0 +1,181 @@
+<!doctype html>
+<!-- bill: money you can watch. Line items land on the words that name them, the total counts up, an optional
+     stamp slams on top. Use the story's real numbers, or say out loud that they are an example.
+     receipt = a printer: the paper rises out of it line by line; `repeat` keeps printing one charge faster and faster
+     invoice = a clean card: title + date, the rows, a big total that counts
+     usage = each row a bar; at count_at every bar and amount climbs together, the total on top climbs with them -->
+<html>
+<head><meta charset="UTF-8"/>
+<link rel="stylesheet" href="tokens.css"/><link rel="stylesheet" href="core/cs.css"/></head>
+<body style="margin:0;padding:0;background:transparent;">
+<div id="stage" data-composition-id="cs-bill" data-width="1080" data-height="1920" data-start="0" data-duration="5" data-track-index="0">
+<style>
+#wrap { position: relative; width: 780px; }
+.amt { font-variant-numeric: tabular-nums lining-nums; white-space: nowrap; }
+.tt { font-family: var(--cs-font-title); font-weight: var(--x-title-weight); text-transform: var(--x-title-case); letter-spacing: var(--x-title-track); line-height: 1.05; }
+.big { font-family: var(--cs-font-title); font-weight: var(--x-title-weight); line-height: 1; letter-spacing: var(--x-title-track); }
+/* receipt */
+#rec { display: none; position: relative; width: 780px; height: 640px; }
+#stage.receipt #rec { display: block; }
+#stage.receipt #cardw { display: none; }
+#feed { position: absolute; left: 14px; top: 0; width: 486px; bottom: 60px; overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 90px); mask-image: linear-gradient(to bottom, transparent 0, black 90px); }
+#paper { position: absolute; left: 10px; right: 10px; bottom: 0; will-change: transform; filter: drop-shadow(0 4px 6px color-mix(in srgb, var(--cs-ink) 22%, transparent)); }
+#sheet { background: var(--x-surface); padding: 48px 32px 24px;
+  clip-path: polygon(0% 14px,5% 0%,10% 14px,15% 0%,20% 14px,25% 0%,30% 14px,35% 0%,40% 14px,45% 0%,50% 14px,55% 0%,60% 14px,65% 0%,70% 14px,75% 0%,80% 14px,85% 0%,90% 14px,95% 0%,100% 14px,100% 100%,0% 100%); }
+#sheet .hd { text-align: center; }
+#sheet .tt { font-size: calc(58px * var(--x-title-scale)); }
+#sheet .dash { height: 0; border-top: 3px dashed color-mix(in srgb, var(--cs-ink) 32%, transparent); margin: 16px 0; }
+.li { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; white-space: nowrap; font-weight: var(--x-strong); font-size: 42px; line-height: 1.5; }
+.li.rp { color: var(--x-ink2); }
+#printer { position: absolute; left: 0; width: 514px; bottom: 0; height: 76px; border-radius: var(--cs-radius); background: var(--x-dark); }
+#printer::after { content: ""; position: absolute; left: 30px; right: 30px; top: 14px; height: 8px; border-radius: 999px; background: color-mix(in srgb, var(--cs-ground) 20%, var(--x-dark)); }
+#tplsh { position: absolute; inset: 0; }
+#tplate { position: absolute; right: 0; bottom: 104px; width: 244px; padding: 30px 24px; }
+#tplate .big { display: inline-block; margin-top: 10px; }
+/* invoice + usage */
+#card { padding: 48px; }
+.ihead { display: flex; align-items: center; gap: 24px; }
+.ihead .cs-tile { width: 100px; height: 100px; }
+.ihead .tt { font-size: calc(68px * var(--x-title-scale)); }
+#stage.usage .ihead { display: none; }
+#stage.usage #card { padding: 40px 48px; }
+#rows { margin-top: 32px; }
+#stage.usage #rows { margin-top: 0; }
+.irow { display: flex; justify-content: space-between; align-items: baseline; padding: 18px 0; border-top: 2px solid var(--x-line); font-weight: var(--x-strong); font-size: 52px; }
+.urow { padding: 12px 0; }
+.urow .top { font-weight: var(--x-strong); font-size: 48px; }
+.track { position: relative; height: 30px; border-radius: 999px; background: var(--x-soft); margin-top: 12px; overflow: hidden; }
+.fill { position: absolute; inset: 0; background: var(--cs-accent); transform-origin: 0 50%; transform: scaleX(0); will-change: transform; }
+.ml > .mi.rowin { display: flex; justify-content: space-between; gap: 24px; width: 100%; }
+#trow { display: flex; justify-content: space-between; align-items: baseline; margin-top: 24px; padding-top: 24px; border-top: var(--cs-stroke) solid var(--cs-ink); }
+#trow .big { font-size: calc(96px * var(--x-title-scale)); }
+#stage.usage #trow { order: -1; margin: 0 0 18px; padding: 0; border: none; flex-direction: column; align-items: flex-start; gap: 8px; }
+#stage.usage #trow .big { font-size: calc(124px * var(--x-title-scale)); }
+#body { display: flex; flex-direction: column; }
+/* stamp */
+#stamp { position: absolute; left: 0; top: 0; z-index: 60; padding: 16px 44px; border: 8px solid var(--cs-accent-2); border-radius: var(--cs-radius);
+  font-family: var(--cs-font-title); font-weight: var(--x-title-weight); font-size: calc(62px * var(--x-title-scale)); letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--cs-accent-2); white-space: nowrap; background: color-mix(in srgb, var(--x-surface) 86%, transparent); will-change: transform, opacity; }
+#stamp::before { content: ""; position: absolute; inset: 6px; border: 3px solid var(--cs-accent-2); border-radius: calc(var(--cs-radius) * 0.6); }
+</style>
+<div id="zone"><div id="cam"><div id="wrap">
+  <div id="rec">
+    <div id="feed"><div id="paper"><div id="sheet"></div></div></div>
+    <div id="printer"></div>
+    <div class="cs-sh" id="tplsh"><div class="cs-card" id="tplate"><div class="ml"><span class="mi cs-eyebrow" id="tl1"></span></div><div class="big amt" id="tv"></div></div></div>
+  </div>
+  <div class="cs-sh" id="cardw"><div class="cs-card" id="card"><div id="body">
+    <div class="ihead" id="ihead"></div>
+    <div id="rows"></div>
+    <div id="trow"><div class="ml"><span class="mi cs-eyebrow" id="tl2"></span></div><div class="big amt" id="tv2"></div></div>
+  </div></div></div>
+  <div id="stamp"></div>
+</div></div></div>
+<script src="core/gsap.min.js"></script>
+<script src="core/cs.js"></script>
+<script>
+CS.comp('bill', function (v, c, tl) {
+  var variant = CS.pick(v.variant, ['receipt', 'invoice', 'usage']);
+  c.stage.classList.add(variant);
+  var items = CS.pairs(v.items).slice(0, 4).map(function (p) { return { k: p.k, n: parseFloat(String(p.v).replace(/[^0-9.\-]/g, '')) || 0 }; });
+  var cur = v.currency == null ? '$' : v.currency, sum = items.reduce(function (a, b) { return a + b.n; }, 0);
+  var total = parseFloat(v.total); if (isNaN(total)) total = sum;
+  var dec = /\./.test(String(v.total) + items.map(function (i) { return String(i.n); }).join('') + String(v.items)) ? 2 : 0;
+  function money(x) { return cur + CS.fmt(x, dec); }
+  var ia = CS.times('items_at', items.length, 0.6, 0.6), ca = CS.t('count_at', 2.4);
+  var cd = Math.max(0.4, Math.min(parseFloat(v.count_dur) || 1.6, c.dur - ca - 0.2)), sa = CS.t('stamp_at', 4), hasStamp = !!v.stamp;
+
+  function stamp(at, host) {
+    var st = document.getElementById('stamp');
+    if (!hasStamp) { st.style.display = 'none'; return; }
+    st.style.display = ''; st.textContent = v.stamp;
+    var hr = host, x = 0, y = 0;
+    while (hr && hr.id !== 'wrap') { x += hr.offsetLeft; y += hr.offsetTop; hr = hr.offsetParent; }
+    gsap.set(st, { x: x + host.offsetWidth * (variant === 'receipt' ? 0.5 : 0.36) - st.offsetWidth / 2, y: y + host.offsetHeight * (variant === 'receipt' ? 0.42 : 0.8) - st.offsetHeight / 2, rotation: -9, scale: 1.4, opacity: 0 });
+    // the slam: it falls onto the paper (accelerating), then the press settles a hair
+    tl.to(st, { scale: 1, opacity: 1, duration: CS.S.micro, ease: CS.EASE.exit }, at);
+    tl.to(st, { scale: 0.985, duration: 0.3, ease: CS.EASE.emphasis }, at + CS.S.micro);
+  }
+
+  if (variant === 'receipt') {
+    document.getElementById('rec').style.height = (c.zone === 'full' ? 860 : 640) + 'px';
+    var rp = CS.pairs(v.repeat)[0], nrep = rp ? 16 : 0;
+    var html = '<div class="hd"><div class="tt">' + CS.esc(v.title || '') + '</div><div class="cs-meta">' + CS.esc(v.date || '') + '</div></div><div class="dash"></div>';
+    html += items.map(function (it) { return '<div class="li"><span>' + CS.esc(it.k) + '</span><span class="amt">' + money(it.n) + '</span></div>'; }).join('');
+    for (var r = 0; r < nrep; r++) html += '<div class="li rp"><span>' + CS.esc(rp.k) + '</span><span class="amt">' + cur + CS.esc(rp.v) + '</span></div>';
+    document.getElementById('sheet').innerHTML = html;
+    document.getElementById('tl1').textContent = v.total_label || 'Total';
+    var tv = document.getElementById('tv');
+    var paper = document.getElementById('paper'), H = paper.offsetHeight;
+    // how much paper is out after k lines: the bottom of line k
+    var lines = [].slice.call(document.querySelectorAll('#sheet .li')), dash = document.querySelector('#sheet .dash'), base = dash.offsetTop + dash.offsetHeight + 16;
+    function shown(k) { return Math.min(H, (k === 0 ? base : lines[k - 1].offsetTop + lines[k - 1].offsetHeight) + 22); }
+    gsap.set(paper, { y: H });
+    tl.to(paper, { y: H - shown(0), duration: CS.S.medium, ease: CS.EASE.enter }, Math.max(0, ia[0] - 0.45));
+    items.forEach(function (it, i) { tl.to(paper, { y: H - shown(i + 1), duration: CS.S.short, ease: CS.EASE.settle }, ia[i]); });
+    // the repeat charge prints faster and faster until the stamp (or the end)
+    var stop = hasStamp ? sa : c.dur - 0.2;
+    var printed = 0;
+    if (rp) {
+      var t = ca, gap = 0.42;
+      for (var j = 0; j < nrep && t < stop - 0.05; j++, printed++) {
+        tl.to(paper, { y: H - shown(items.length + j + 1), duration: Math.max(0.1, Math.min(CS.S.short, gap * 0.8)), ease: CS.EASE.settle }, t);
+        t += gap; gap = Math.max(0.09, gap * 0.8);
+      }
+    }
+    // with a repeat charge and no given total, the total is what actually printed
+    if (rp && isNaN(parseFloat(v.total))) total = sum + printed * (parseFloat(rp.v) || 0);
+    tv.textContent = money(Math.max(total, sum));
+    CS.fitWidth(tv, 196, CS.titleSizes([92, 84, 76, 68, 60, 54]));
+    CS.surfaceIn(tl, '#tplate', Math.max(0, ia[0] - 0.2), { plate: true });
+    CS.linesIn(tl, '#tl1', ia[0]);
+    tv.textContent = money(0);
+    if (rp) {
+      CS.count(tl, tv, { from: 0, to: sum, at: ia[0], dur: Math.max(0.3, ia[ia.length - 1] - ia[0] + 0.3), dec: dec, pre: cur, ease: CS.EASE.settle });
+      CS.count(tl, tv, { from: sum, to: Math.max(total, sum), at: ca, dur: Math.max(0.4, stop - ca), dec: dec, pre: cur, ease: CS.EASE.linear });
+    } else CS.count(tl, tv, { from: 0, to: total, at: ca, dur: cd, dec: dec, pre: cur });
+    stamp(sa, document.getElementById('feed'));
+  } else {
+    var ih = document.getElementById('ihead');
+    ih.innerHTML = (v.image ? '<div class="cs-tile lg" id="tile"></div>' : '') +
+      '<div><div class="ml"><span class="mi tt">' + CS.esc(v.title || '') + '</span></div><div class="ml"><span class="mi cs-meta">' + CS.esc(v.date || '') + '</span></div></div>';
+    if (v.image) CS.tile(document.getElementById('tile'), v.image, v.title);
+    var maxv = Math.max.apply(null, items.map(function (i) { return i.n; }).concat([0.001]));
+    document.getElementById('rows').innerHTML = items.map(function (it, i) {
+      return variant === 'invoice'
+        ? '<div class="irow ml" id="rw' + i + '"><span class="mi rowin"><span>' + CS.esc(it.k) + '</span><span class="amt">' + money(it.n) + '</span></span></div>'
+        : '<div class="urow" id="rw' + i + '"><div class="top ml"><span class="mi rowin"><span>' + CS.esc(it.k) + '</span><span class="amt" id="ua' + i + '"></span></span></div><div class="track"><i class="fill" id="uf' + i + '"></i></div></div>';
+    }).join('');
+    document.getElementById('tl2').textContent = v.total_label || (variant === 'usage' ? 'So far' : 'Total');
+    var tv2 = document.getElementById('tv2'); tv2.textContent = money(0);
+    CS.surfaceIn(tl, '#card', 0.05, { dir: 'down' });
+    if (v.image) CS.settle(tl, '#tile', 0.25, { scale: true });
+    CS.linesIn(tl, '#ihead .mi', 0.3);
+    CS.linesIn(tl, '#tl2', 0.35);
+    if (variant === 'invoice') {
+      items.forEach(function (it, i) { CS.linesIn(tl, '#rw' + i + ' > .mi', ia[i]); });
+      CS.count(tl, tv2, { from: 0, to: total, at: ca, dur: cd, dec: dec, pre: cur });
+    } else {
+      var START = 0.14;   // each meter starts small, then everything climbs together
+      items.forEach(function (it, i) {
+        CS.linesIn(tl, '#rw' + i + ' .mi', ia[i]);
+        var ua = document.getElementById('ua' + i); ua.textContent = money(0);
+        tl.to('#uf' + i, { scaleX: START * it.n / maxv, duration: 0.45, ease: CS.EASE.enter }, ia[i] + 0.1);
+        CS.count(tl, ua, { from: 0, to: it.n * START, at: ia[i] + 0.1, dur: 0.45, dec: dec, pre: cur, ease: CS.EASE.enter });
+        tl.to('#uf' + i, { scaleX: it.n / maxv, duration: cd, ease: CS.EASE.travel }, ca);
+        CS.count(tl, ua, { from: it.n * START, to: it.n, at: ca, dur: cd, dec: dec, pre: cur });
+      });
+      CS.count(tl, tv2, { from: 0, to: sum * START, at: ia[0] + 0.1, dur: Math.max(0.3, ia[ia.length - 1] - ia[0] + 0.4), dec: dec, pre: cur, ease: CS.EASE.settle });
+      CS.count(tl, tv2, { from: sum * START, to: total, at: ca, dur: cd, dec: dec, pre: cur });
+    }
+    stamp(sa, document.getElementById('card'));
+  }
+  CS.place(document.getElementById('wrap'), { max: variant === 'receipt' ? 1 : 1.12 });
+  CS.breath(tl, '#cam', Math.max(ca + 0.3, ia[ia.length - 1] + 0.6), c.dur, 0.015);
+  CS.ending(tl, '#wrap');
+});
+</script>
+</div>
+</body>
+</html>

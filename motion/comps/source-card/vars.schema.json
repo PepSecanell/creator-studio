@@ -1,0 +1,20 @@
+{
+  "name": "source-card",
+  "label": "A source rebuilt as one clean card: who said it, when, and ONE line with the key words marked",
+  "kind": "both",
+  "zones": ["split", "full"],
+  "duration": 5,
+  "vars": {
+    "variant": { "type": "enum", "values": ["card", "push", "quote"], "default": "card", "label": "card = article card, push = phone notification, quote = a sentence a person wrote" },
+    "logo": { "type": "image", "default": "", "label": "The source's logo, a path (blank = initials)" },
+    "source": { "type": "string", "default": "The Weekly Build", "label": "Source name" },
+    "date": { "type": "string", "default": "14 Oct", "label": "The date as printed" },
+    "line": { "type": "string", "default": "Small teams now ship a working app in a single weekend", "label": "ONE line, verbatim, at most about 14 words" },
+    "hot": { "type": "string", "default": "a single weekend", "label": "Words to mark, | separated (at most 2 runs)" },
+    "hot_at": { "type": "time", "default": "1.6", "label": "When each mark swipes, | separated" },
+    "card_at": { "type": "time", "default": 0.1, "label": "When the card arrives" },
+    "line_at": { "type": "time", "default": 0.5, "label": "When the line rises" },
+    "out": { "type": "enum", "values": ["cut", "edge"], "default": "cut", "label": "cut = hold to the end, edge = leave by its edge" },
+    "out_at": { "type": "time", "default": "", "label": "edge: when it leaves (blank = end)" }
+  }
+}

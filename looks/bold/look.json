@@ -1,0 +1,51 @@
+{
+  "schema": "creator-look/v1",
+  "id": "bold",
+  "label": "Bold",
+  "fonts": {
+    "title": "fonts/Anton-Regular.ttf",
+    "caption": "fonts/Inter-ExtraBold.ttf",
+    "body": "fonts/Inter-Medium.ttf",
+    "hand": "fonts/Anton-Regular.ttf"
+  },
+  "palette_defaults": {
+    "ground": "#F3F1EC",
+    "ink": "#0F0F12",
+    "accent": "#FF5A1F",
+    "accent_2": "#2546F0",
+    "muted": "#85827C",
+    "on_accent": "#0F0F12"
+  },
+  "captions": {
+    "shape": "box",
+    "fill": "ink",
+    "text": "ground",
+    "emphasis": "accent",
+    "emphasis_mode": "box",
+    "size": 72,
+    "y": 0.66,
+    "max_words": 3
+  },
+  "hook_card": {
+    "shape": "block",
+    "fill": "accent",
+    "text": "on_accent"
+  },
+  "end_card": {
+    "fill": "ink",
+    "text": "ground",
+    "show_logo": true,
+    "show_cta": true
+  },
+  "layouts": [
+    "face",
+    "split",
+    "graphic",
+    "title"
+  ],
+  "cover": {
+    "layout": "face_words",
+    "max_words": 4
+  },
+  "motion": "tokens.css"
+}

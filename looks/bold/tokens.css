@@ -1,0 +1,49 @@
+/* Bold look: poster contrast, tall condensed capitals, solid blocks and hard offset shadows.
+ * The six palette roles come first: `./studio brand build` replaces them with the brand's palette.
+ * Every other colour below is mixed from those six, so a new palette keeps the look intact. */
+:root {
+  --cs-ground: #F3F1EC;
+  --cs-ink: #0F0F12;
+  --cs-accent: #FF5A1F;
+  --cs-accent-2: #2546F0;
+  --cs-muted: #85827C;
+  --cs-on-accent: #0F0F12;
+
+  --cs-font-title: 'Anton', 'Impact', sans-serif;
+  --cs-font-body: 'Inter', system-ui, sans-serif;
+  --cs-font-hand: 'Anton', 'Impact', sans-serif;
+  --cs-hand-scale: 1;
+  --cs-hand-style: normal;
+  --cs-radius: 8px;
+  --cs-stroke: 6px;
+
+  /* type: everything that is a title shouts, in capitals, set tight */
+  --cs-title-weight: 400;
+  --cs-title-case: uppercase;
+  --cs-title-track: 0.004em;
+  --cs-title-lead: 0.94;
+  --cs-title-scale: 1.18;
+  --cs-strong-weight: 800;
+  --cs-body-weight: 700;
+
+  /* surfaces: flat white plates with a full ink border and a hard offset shadow */
+  --cs-surface: color-mix(in srgb, var(--cs-ground) 35%, white);
+  --cs-surface-pattern: none;
+  --cs-edge: var(--cs-ink);
+  --cs-border-width: 5px;
+  --cs-shadow: 10px 10px 0 var(--cs-ink);
+
+  /* the marker: a solid block behind the words, the words flip to the on-accent colour */
+  --cs-mark-color: var(--cs-accent);
+  --cs-mark-text: var(--cs-on-accent);
+  --cs-mark-top: 4%;
+  --cs-mark-bottom: -2%;
+  --cs-mark-radius: 0px;
+  --cs-mark-tilt: 0deg;
+  --cs-mark-mask: none;
+}
+
+@font-face { font-family: 'Anton'; src: url(fonts/Anton-Regular.ttf) format('truetype'); font-weight: 100 900; font-display: block; }
+@font-face { font-family: 'Inter'; src: url(fonts/Inter-Medium.ttf) format('truetype'); font-weight: 100 550; font-display: block; }
+@font-face { font-family: 'Inter'; src: url(fonts/Inter-Bold.ttf) format('truetype'); font-weight: 551 750; font-display: block; }
+@font-face { font-family: 'Inter'; src: url(fonts/Inter-ExtraBold.ttf) format('truetype'); font-weight: 751 900; font-display: block; }

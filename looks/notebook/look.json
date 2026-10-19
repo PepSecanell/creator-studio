@@ -1,0 +1,51 @@
+{
+  "schema": "creator-look/v1",
+  "id": "notebook",
+  "label": "Notebook",
+  "fonts": {
+    "title": "fonts/Newsreader-SemiBold.ttf",
+    "caption": "fonts/Inter-Bold.ttf",
+    "body": "fonts/Inter-Regular.ttf",
+    "hand": "fonts/Caveat-Bold.ttf"
+  },
+  "palette_defaults": {
+    "ground": "#F7F4EC",
+    "ink": "#26324F",
+    "accent": "#FFE066",
+    "accent_2": "#E4573D",
+    "muted": "#8A8F9C",
+    "on_accent": "#26324F"
+  },
+  "captions": {
+    "shape": "pill",
+    "fill": "ground",
+    "text": "ink",
+    "emphasis": "accent",
+    "emphasis_mode": "marker",
+    "size": 66,
+    "y": 0.68,
+    "max_words": 4
+  },
+  "hook_card": {
+    "shape": "strip",
+    "fill": "ground",
+    "text": "ink"
+  },
+  "end_card": {
+    "fill": "ground",
+    "text": "ink",
+    "show_logo": true,
+    "show_cta": true
+  },
+  "layouts": [
+    "face",
+    "split",
+    "graphic",
+    "title"
+  ],
+  "cover": {
+    "layout": "face_words",
+    "max_words": 5
+  },
+  "motion": "tokens.css"
+}

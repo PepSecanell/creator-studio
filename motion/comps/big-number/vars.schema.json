@@ -1,0 +1,24 @@
+{
+  "name": "big-number",
+  "label": "One number that lands, with one short label",
+  "kind": "both",
+  "zones": ["split", "full"],
+  "duration": 4,
+  "vars": {
+    "variant": { "type": "enum", "values": ["hero", "odometer", "bar"], "default": "hero", "label": "hero = huge number, odometer = rolling tiles, bar = a meter that fills" },
+    "value": { "type": "number", "default": 212, "label": "The number it lands on (time format: minutes, 180 = 03:00)" },
+    "from": { "type": "number", "default": 0, "label": "Where the count starts" },
+    "decimals": { "type": "number", "default": 0, "label": "Decimals" },
+    "prefix": { "type": "string", "default": "$", "label": "Before the number, for example $" },
+    "unit": { "type": "string", "default": "", "label": "After the number, short: %, x, hrs" },
+    "label": { "type": "string", "default": "spent while you slept", "label": "ONE label, at most 5 words" },
+    "format": { "type": "enum", "values": ["number", "time"], "default": "number", "label": "number, or time (HH:MM)" },
+    "count_at": { "type": "time", "default": 0.5, "label": "When the count starts" },
+    "count_dur": { "type": "number", "default": 1.8, "label": "How long it counts, in seconds" },
+    "max": { "type": "number", "default": 300, "label": "bar: the full meter" },
+    "cap": { "type": "string", "default": "", "label": "bar: where it stops (blank = no cap)" },
+    "cap_label": { "type": "string", "default": "cap", "label": "bar: the cap tag" },
+    "out": { "type": "enum", "values": ["cut", "edge"], "default": "cut", "label": "cut = hold to the end, edge = leave by its edge" },
+    "out_at": { "type": "time", "default": "", "label": "edge: when it leaves (blank = end)" }
+  }
+}

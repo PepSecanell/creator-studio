@@ -1,0 +1,18 @@
+{
+  "name": "quote",
+  "label": "A pull quote for a long video: one sentence, big, the key words marked, then who said it",
+  "kind": "long",
+  "zones": ["full", "split"],
+  "duration": 6,
+  "vars": {
+    "variant": { "type": "enum", "values": ["center", "side", "card"], "default": "center", "label": "center = big and centred with an opening mark, side = left aligned beside the speaker, card = on a paper card" },
+    "text": { "type": "string", "default": "The first version is supposed to be embarrassing", "label": "The quote, at most about 20 words" },
+    "author": { "type": "string", "default": "A founder we spoke to", "label": "Who said it" },
+    "role": { "type": "string", "default": "", "label": "Optional line under the name" },
+    "hot": { "type": "string", "default": "supposed to be embarrassing", "label": "Words to mark, | separated (at most 2 runs)" },
+    "hot_at": { "type": "time", "default": "2.0", "label": "When each mark swipes, | separated" },
+    "at": { "type": "time", "default": 0.2, "label": "When it arrives" },
+    "out": { "type": "enum", "values": ["edge", "cut"], "default": "edge", "label": "edge = leave by its edge at out_at, cut = hold to the end" },
+    "out_at": { "type": "time", "default": "", "label": "edge: when it leaves (blank = 0.4 s before the end)" }
+  }
+}

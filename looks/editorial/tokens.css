@@ -1,0 +1,51 @@
+/* Editorial look: a calm serif on cream, thin rules, a quiet underline instead of a highlighter.
+ * The six palette roles come first: `./studio brand build` replaces them with the brand's palette.
+ * Every other colour below is mixed from those six, so a new palette keeps the look intact. */
+:root {
+  --cs-ground: #F3EEE4;
+  --cs-ink: #1C1B19;
+  --cs-accent: #A4473A;
+  --cs-accent-2: #3E5A4D;
+  --cs-muted: #8E877C;
+  --cs-on-accent: #FBF7F0;
+
+  --cs-font-title: 'Instrument Serif', 'Times New Roman', serif;
+  --cs-font-body: 'Instrument Sans', system-ui, sans-serif;
+  --cs-font-hand: 'Instrument Serif', 'Times New Roman', serif;
+  --cs-hand-scale: 1.2;
+  --cs-hand-style: italic;
+  --cs-quote-style: italic;
+  --cs-radius: 3px;
+  --cs-stroke: 3px;
+
+  /* type: a light display serif needs size, not weight */
+  --cs-title-weight: 400;
+  --cs-title-case: none;
+  --cs-title-track: -0.01em;
+  --cs-title-lead: 1.02;
+  --cs-title-scale: 1.16;
+  --cs-strong-weight: 600;
+  --cs-body-weight: 500;
+
+  /* surfaces: a page lighter than the ground, a hairline edge, a shadow you barely notice */
+  --cs-surface: color-mix(in srgb, var(--cs-ground) 70%, white);
+  --cs-surface-pattern: none;
+  --cs-edge: color-mix(in srgb, var(--cs-ink) 22%, var(--cs-ground));
+  --cs-border-width: 2px;
+  --cs-shadow: 0 14px 28px color-mix(in srgb, var(--cs-ink) 10%, transparent);
+
+  /* the marker: a thin underline drawn under the words */
+  --cs-mark-color: var(--cs-accent);
+  --cs-mark-text: var(--cs-ink);
+  --cs-mark-top: 90%;
+  --cs-mark-bottom: 0%;
+  --cs-mark-radius: 0px;
+  --cs-mark-tilt: 0deg;
+  --cs-mark-mask: none;
+}
+
+@font-face { font-family: 'Instrument Serif'; src: url(fonts/InstrumentSerif-Regular.ttf) format('truetype'); font-weight: 100 900; font-style: normal; font-display: block; }
+@font-face { font-family: 'Instrument Serif'; src: url(fonts/InstrumentSerif-Italic.ttf) format('truetype'); font-weight: 100 900; font-style: italic; font-display: block; }
+@font-face { font-family: 'Instrument Sans'; src: url(fonts/InstrumentSans-Regular.ttf) format('truetype'); font-weight: 100 450; font-display: block; }
+@font-face { font-family: 'Instrument Sans'; src: url(fonts/InstrumentSans-Medium.ttf) format('truetype'); font-weight: 451 550; font-display: block; }
+@font-face { font-family: 'Instrument Sans'; src: url(fonts/InstrumentSans-SemiBold.ttf) format('truetype'); font-weight: 551 900; font-display: block; }

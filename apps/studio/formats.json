@@ -1,0 +1,80 @@
+{
+  "schema": "studio-formats/v1",
+  "shorts": [
+    {
+      "id": "same-idea-3-ways",
+      "name": "Same idea, 3 ways",
+      "blurb": "One sentence said three different ways, so the viewer hears the difference.",
+      "points": [3, 3],
+      "structure": "The hook idea names one plain sentence the viewer might say today. The points are the three versions of that sentence, each described in a few words (for example: rushed, flat, with a pause). The payoff says which version works and why, in one line."
+    },
+    {
+      "id": "say-this-not-that",
+      "name": "Say this, not that",
+      "blurb": "A common phrase and a better one, with the reason in one line.",
+      "points": [2, 3],
+      "structure": "The hook idea names the common phrase the viewer probably uses. The points are: what people usually say, what to say instead, and the reason it lands better. The payoff is the better phrase in a situation the viewer will meet this week."
+    },
+    {
+      "id": "myth-then-fix",
+      "name": "Myth then fix",
+      "blurb": "A belief the audience holds, why it is wrong, and what to do instead.",
+      "points": [2, 3],
+      "structure": "The hook idea states the myth as if the viewer believes it. The points are: why people believe it, what actually happens, and the fix in one step. The payoff is a result the viewer can check on their own."
+    },
+    {
+      "id": "i-tried-x",
+      "name": "I tried X",
+      "blurb": "A small real test: what was tried, what happened, what to take from it.",
+      "points": [2, 3],
+      "structure": "The hook idea says what was tried, with the result left out. The points are: the setup in one line, what actually happened, and what changed because of it. Only use details that are listed under facts. Never invent results, numbers or names."
+    },
+    {
+      "id": "one-tip-one-example",
+      "name": "One tip, one example",
+      "blurb": "A single tip and one concrete example that proves it.",
+      "points": [2, 2],
+      "structure": "The hook idea is the problem the tip solves, from the viewer's side. The points are: the tip in under ten words, and one concrete example of it in use. The payoff is the first step the viewer can do in under a minute."
+    }
+  ],
+  "long": [
+    {
+      "id": "explainer",
+      "name": "Explainer",
+      "blurb": "One idea explained from zero, with a clear mechanism and three things to do.",
+      "points": [4, 6],
+      "structure": "Open on the thing itself, not on an introduction. Promise the result in the first 30 seconds. Each talking point explains one part of how it works and ends with something the viewer can do. Finish with the three steps in order."
+    },
+    {
+      "id": "build-along",
+      "name": "Build along",
+      "blurb": "Make one small thing on camera, step by step, including the parts that went wrong.",
+      "points": [5, 7],
+      "structure": "Show the finished result first. Each talking point is one step of the build with what to click or type, and one thing that can go wrong. Finish by showing the result again and what to try next."
+    },
+    {
+      "id": "story-lesson",
+      "name": "Story and lesson",
+      "blurb": "A short true story used as proof for one lesson the viewer can use.",
+      "points": [4, 5],
+      "structure": "Start in the middle of the moment. Each talking point is a beat of the story paired with the lesson it shows. Only use story details that the creator provides as facts. Finish with the lesson as one plain sentence."
+    }
+  ],
+  "thumbnail_shapes": [
+    {
+      "id": "face-words",
+      "name": "Face and words",
+      "rule": "A close face showing one clear emotion plus two to five big words. The words add to the title, they do not repeat it."
+    },
+    {
+      "id": "object-number",
+      "name": "Object and number",
+      "rule": "One real object or product screen, large, with one number or short result next to it. No face."
+    },
+    {
+      "id": "split-contrast",
+      "name": "Split contrast",
+      "rule": "The frame is split in two: the wrong way on one side, the right way on the other. One word per side."
+    }
+  ]
+}

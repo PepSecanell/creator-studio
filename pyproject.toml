@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cstudio"
+version = "0.1.0"
+description = "Edit Shorts and long videos from raw takes, with your own brand."
+requires-python = ">=3.10"
+dependencies = ["Pillow>=10.1", "numpy>=1.24"]
+
+[project.optional-dependencies]
+face = ["opencv-python-headless>=4.8,<5"]
+whisper = ["faster-whisper>=1.0"]
+dev = ["pytest>=7.4"]
+
+[project.scripts]
+studio = "cstudio.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["cstudio*"]
+
+[tool.setuptools.package-data]
+cstudio = ["platforms.json", "demo/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["slow: needs ffmpeg and renders video"]

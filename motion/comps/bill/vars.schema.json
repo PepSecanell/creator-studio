@@ -1,0 +1,25 @@
+{
+  "name": "bill",
+  "label": "Money you can watch: line items land on their words, the total counts up, a stamp can stop it",
+  "kind": "both",
+  "zones": ["split", "full"],
+  "duration": 5,
+  "vars": {
+    "variant": { "type": "enum", "values": ["receipt", "invoice", "usage"], "default": "receipt", "label": "receipt = a printer feeding paper, invoice = a clean card, usage = bars that climb together" },
+    "title": { "type": "string", "default": "Monthly tools", "label": "Title, 2 or 3 words" },
+    "image": { "type": "image", "default": "", "label": "invoice: optional logo" },
+    "date": { "type": "string", "default": "October", "label": "Date or period" },
+    "items": { "type": "string", "default": "Hosting=5.00|Domain=1.20|Email=3.00", "label": "Name=amount, | separated (2 to 4)" },
+    "items_at": { "type": "time", "default": "0.6|1.2|1.8", "label": "When each item lands, | separated" },
+    "currency": { "type": "string", "default": "$", "label": "Currency symbol" },
+    "total": { "type": "string", "default": "", "label": "Final total (blank = the sum of the items)" },
+    "total_label": { "type": "string", "default": "Total", "label": "The total's label" },
+    "count_at": { "type": "time", "default": 2.4, "label": "When the total starts climbing" },
+    "count_dur": { "type": "number", "default": 1.6, "label": "How long it climbs, in seconds" },
+    "repeat": { "type": "string", "default": "", "label": "receipt: a charge that keeps printing, Name=amount (blank = none)" },
+    "stamp": { "type": "string", "default": "", "label": "Stamp text (blank = none)" },
+    "stamp_at": { "type": "time", "default": 4.0, "label": "When the stamp slams" },
+    "out": { "type": "enum", "values": ["cut", "edge"], "default": "cut", "label": "cut = hold to the end, edge = leave" },
+    "out_at": { "type": "time", "default": "", "label": "edge: when it leaves (blank = end)" }
+  }
+}

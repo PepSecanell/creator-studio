@@ -1,0 +1,114 @@
+/* cs.css: shared rules for every motion comp.
+ *
+ * Colours, fonts, radius and stroke come ONLY from the --cs-* tokens (a look's tokens.css, or the
+ * brand's workspace/.brand/tokens.css). Everything else here is derived from those tokens, so a brand
+ * that changes its six palette roles changes every comp at once.
+ *
+ * The renderer paints nothing behind a comp: the output is transparent and the video builder lays the
+ * ground, the face and the captions. Nothing in this file paints a full frame background.
+ */
+@font-face { font-family: 'CS Mono'; src: url(fonts/JetBrainsMono-Medium.ttf) format('truetype'); font-weight: 400 600; font-display: block; }
+@font-face { font-family: 'CS Mono'; src: url(fonts/JetBrainsMono-Bold.ttf) format('truetype'); font-weight: 700 900; font-display: block; }
+
+#stage {
+  /* optional look tokens, with safe fallbacks (a look may leave any of them out) */
+  --x-font-hand: var(--cs-font-hand, var(--cs-font-title));
+  --x-hand-scale: var(--cs-hand-scale, 1);
+  --x-hand-style: var(--cs-hand-style, normal);
+  --x-font-mono: var(--cs-font-mono, 'CS Mono', ui-monospace, monospace);
+  --x-title-weight: var(--cs-title-weight, 600);
+  --x-title-case: var(--cs-title-case, none);
+  --x-title-track: var(--cs-title-track, -0.015em);
+  --x-title-lead: var(--cs-title-lead, 1.06);
+  --x-title-scale: var(--cs-title-scale, 1);
+  --x-strong: var(--cs-strong-weight, 700);
+  --x-body-weight: var(--cs-body-weight, 500);
+  --x-border-w: var(--cs-border-width, 2px);
+  --x-shadow: var(--cs-shadow, 0 18px 40px -18px color-mix(in srgb, var(--cs-ink) 45%, transparent));
+  --x-surface: var(--cs-surface, color-mix(in srgb, var(--cs-ground) 72%, white));
+  --x-surface-pattern: var(--cs-surface-pattern, none);
+  --x-mark: var(--cs-mark-color, var(--cs-accent));
+  --x-mark-text: var(--cs-mark-text, var(--cs-ink));
+  --x-mark-top: var(--cs-mark-top, 14%);
+  --x-mark-bottom: var(--cs-mark-bottom, 4%);
+  --x-mark-mask: var(--cs-mark-mask, none);
+  --x-mark-radius: var(--cs-mark-radius, 4px);
+  --x-mark-tilt: var(--cs-mark-tilt, 0deg);
+
+  /* derived colours: decoration and secondary text, all mixed from the six roles */
+  --x-ink2: color-mix(in srgb, var(--cs-ink) 66%, var(--cs-ground));
+  --x-line: color-mix(in srgb, var(--cs-ink) 16%, transparent);
+  --x-edge: var(--cs-edge, color-mix(in srgb, var(--cs-ink) 14%, var(--x-surface)));
+  --x-dark: var(--cs-ink);
+  --x-on-dark: var(--cs-ground);
+  --x-on-dark2: color-mix(in srgb, var(--cs-ground) 64%, var(--cs-ink));
+  --x-soft: color-mix(in srgb, var(--cs-muted) 22%, var(--x-surface));
+
+  position: relative; overflow: hidden;
+  font-family: var(--cs-font-body); font-weight: var(--x-body-weight); color: var(--cs-ink);
+  -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision;
+}
+/* type ladder: vertical frames read at phone size, landscape at TV size */
+#stage[data-shape="vertical"] { --t-hero: 260px; --t-display: 148px; --t-head: 92px; --t-body: 62px; --t-label: 54px; --t-meta: 42px; --t-small: 40px; --gap: 32px; --pad: 52px; }
+#stage[data-shape="landscape"] { --t-hero: 230px; --t-display: 124px; --t-head: 76px; --t-body: 50px; --t-label: 44px; --t-meta: 34px; --t-small: 30px; --gap: 28px; --pad: 44px; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* the placed group: CS.place() moves and scales it into the zone; #cam inside it breathes */
+#zone { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
+#cam { position: relative; transform-origin: 50% 50%; will-change: transform; }
+
+/* type roles */
+.cs-title { font-family: var(--cs-font-title); font-weight: var(--x-title-weight); text-transform: var(--x-title-case);
+  letter-spacing: var(--x-title-track); line-height: var(--x-title-lead); }
+.cs-hand { font-family: var(--x-font-hand); font-weight: 700; font-style: var(--x-hand-style); line-height: 1; }
+.cs-mono { font-family: var(--x-font-mono); font-weight: 600; }
+.cs-strong { font-weight: var(--x-strong); }
+.cs-eyebrow { font-size: var(--t-meta); font-weight: var(--x-strong); letter-spacing: 0.08em; text-transform: uppercase; color: var(--x-ink2); }
+.cs-meta { font-size: var(--t-meta); font-weight: var(--x-body-weight); color: var(--x-ink2); }
+.cs-num { font-variant-numeric: tabular-nums lining-nums; }
+
+/* surfaces: the shadow lives on an unclipped wrapper, because a clip-path on the surface eats it */
+.cs-sh { filter: drop-shadow(var(--x-shadow)); }
+.cs-card { position: relative; background: var(--x-surface-pattern), var(--x-surface);
+  border: var(--x-border-w) solid var(--x-edge); border-radius: var(--cs-radius); will-change: clip-path; }
+.cs-dark { position: relative; background: var(--x-dark); color: var(--x-on-dark); border-radius: var(--cs-radius); will-change: clip-path; }
+.cs-fill { position: relative; background: var(--cs-accent); color: var(--cs-on-accent); border-radius: var(--cs-radius); will-change: clip-path; }
+
+/* an image the user supplied (logo, avatar): never recoloured, sits on a tile so any mark reads */
+.cs-tile { display: flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  background: var(--x-surface); border: var(--x-border-w) solid var(--x-edge); border-radius: calc(var(--cs-radius) * 1.4);
+  overflow: hidden; will-change: transform, opacity; }
+.cs-tile img { width: 68%; height: 68%; object-fit: contain; display: block; }
+/* the fallback when there is no image: initials set in the title face on a filled tile */
+.cs-tile.mono { background: var(--x-dark); color: var(--x-on-dark); border-color: transparent;
+  font-family: var(--cs-font-title); font-weight: var(--x-title-weight); text-transform: uppercase; letter-spacing: 0; line-height: 1; }
+.cs-tile.mono-1 { background: var(--cs-accent); color: var(--cs-on-accent); }
+.cs-tile.mono-2 { background: var(--x-surface); color: var(--cs-ink); border-color: var(--cs-ink); }
+
+/* chips settle, they are never masked */
+.cs-chip { display: inline-flex; align-items: center; gap: 0.35em; white-space: nowrap; will-change: transform, opacity;
+  border-radius: 999px; padding: 0.32em 0.8em; font-size: var(--t-label); font-weight: var(--x-strong); line-height: 1; }
+.cs-chip.accent { background: var(--cs-accent); color: var(--cs-on-accent); }
+.cs-chip.dark { background: var(--x-dark); color: var(--x-on-dark); }
+.cs-chip.soft { background: var(--x-soft); color: var(--cs-ink); }
+.cs-chip.line { background: var(--x-surface); color: var(--cs-ink); border: var(--x-border-w) solid var(--cs-ink); }
+
+/* a rule that draws (scaleX) */
+.cs-rule { height: max(2px, calc(var(--cs-stroke) * 0.6)); background: var(--x-line); transform-origin: 0 50%; will-change: transform; }
+
+/* masked lines: CS.rich() / CS.lines() set one .ml > .mi per rendered line, CS.linesIn() raises them */
+.ml { display: block; overflow: hidden; padding-bottom: 0.12em; margin-bottom: -0.12em; }
+.ml > .mi { display: inline-block; will-change: transform; }
+
+/* the marker: a highlight behind the hot words, uncovered left to right by CS.swipe().
+ * Its shape is look tokens: a rough highlighter (notebook), a solid block (bold), a thin underline (editorial). */
+.hl { position: relative; display: inline-block; isolation: isolate; }
+.hl .hw { position: relative; z-index: 1; }
+.mk { position: absolute; left: -0.08em; right: -0.08em; top: var(--x-mark-top); bottom: var(--x-mark-bottom); z-index: 0;
+  background: var(--x-mark); border-radius: var(--x-mark-radius); transform: rotate(var(--x-mark-tilt));
+  -webkit-mask-image: var(--x-mark-mask); mask-image: var(--x-mark-mask); -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+  clip-path: inset(0% 100% 0% 0%); will-change: clip-path; }
+.mko { position: absolute; left: 0; top: 0; z-index: 2; white-space: nowrap; color: var(--x-mark-text);
+  clip-path: inset(0% 100% 0% 0%); will-change: clip-path; pointer-events: none; }
+.cs-dark .mk { top: auto; bottom: -0.1em; height: max(6px, 0.12em); background: var(--cs-accent); -webkit-mask-image: none; mask-image: none; transform: none; }
+.cs-dark .mko { display: none; }
